@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="x-ua-compatible" content="ie=edge" />
+        <title>Mail</title>
+    </head>
+    <body>
+        <h1>Please Verify Your Email</h1>
+        <hr/>
+        <div>
+            Thank you for signing up to WeddingApp, please click on the below url to activate your account :
+            https://weddingapp.com/verify?t=<span th:text="${token}"></span>.<br/> Verification link expires in <span th:text="${expiresAt}"></span> hours.
+        </div>
+    </body>
+</html>

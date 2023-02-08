@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="x-ua-compatible" content="ie=edge" />
+        <title>Mail</title>
+    </head>
+    <body>
+        <h1>Couple's Request</h1>
+        <hr/>
+        <div>
+            Hello, You have been sent a couple's request by the above email, Click on the link below to accept or reject request.
+            https://weddingapp.com/weddings/requests/<span th:text="${token}"></span>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,17 @@
+global:
+  scrape_interval:     10s
+  evaluation_interval: 10s
+
+scrape_configs:
+  - job_name: 'user_service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['user-service:8082']
+        labels:
+          application: 'User Service Application'
+  - job_name: 'wedding_service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['wedding-service:8083']
+        labels:
+          application: 'Wedding Service Application'
