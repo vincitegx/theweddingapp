@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserController2.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">users</a> &gt; <a href="index.source.html" class="el_package">com.slinkdigital.user.controller</a> &gt; <span class="el_source">UserController2.java</span></div><h1>UserController2.java</h1><pre class="source lang-java linenums">package com.slinkdigital.user.controller;
+
+import com.slinkdigital.user.dto.ApiResponse;
+import com.slinkdigital.user.dto.UserDto;
+import com.slinkdigital.user.dto.EmailRequest;
+import com.slinkdigital.user.dto.JwtAuthResponse;
+import com.slinkdigital.user.dto.LoginRequest;
+import com.slinkdigital.user.dto.PasswordResetRequest;
+import com.slinkdigital.user.dto.RefreshTokenRequest;
+import com.slinkdigital.user.dto.RegisterRequest;
+import com.slinkdigital.user.service.PasswordResetService;
+import java.net.URI;
+import java.time.LocalDateTime;
+import java.util.Map;
+import javax.validation.Valid;
+import static org.springframework.http.HttpStatus.CREATED;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import com.slinkdigital.user.service.UserService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import static org.springframework.http.HttpStatus.OK;
+import org.springframework.web.bind.annotation.RequestParam;
+
+/**
+ *
+ * @author TEGA
+ */
+@RestController
+@RequestMapping(&quot;api/uu/v1/users&quot;)
+<span class="nc" id="L37">@RequiredArgsConstructor</span>
+<span class="nc" id="L38">@Slf4j</span>
+public class UserController2 {
+
+    private final UserService userService;
+    private final PasswordResetService passwordResetService;
+
+    @PostMapping
+    public ResponseEntity&lt;ApiResponse&gt; registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
+<span class="nc" id="L46">        Map&lt;String, String&gt; registrationStatus = userService.registerUser(registerRequest);</span>
+<span class="nc" id="L47">        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(&quot;/api/v1/users&quot;).toUriString());</span>
+<span class="nc" id="L48">        return ResponseEntity.created(uri).body(</span>
+<span class="nc" id="L49">                ApiResponse.builder()</span>
+<span class="nc" id="L50">                        .timeStamp(LocalDateTime.now())</span>
+<span class="nc" id="L51">                        .data(Map.of(&quot;isRegistered&quot;, true))</span>
+<span class="nc" id="L52">                        .message(registrationStatus.get(&quot;success&quot;))</span>
+<span class="nc" id="L53">                        .status(CREATED)</span>
+<span class="nc" id="L54">                        .build()</span>
+        );
+    }
+
+    @PostMapping(&quot;request-new-verification-token&quot;)
+    public ResponseEntity&lt;ApiResponse&gt; requestNewVerificationToken(@Valid @RequestBody EmailRequest emailRequest) {
+<span class="nc" id="L60">        Map&lt;String, String&gt; requestStatus = userService.requestNewVerificationToken(emailRequest);</span>
+<span class="nc" id="L61">        return ResponseEntity.ok(</span>
+<span class="nc" id="L62">                ApiResponse.builder()</span>
+<span class="nc" id="L63">                        .timeStamp(LocalDateTime.now())</span>
+<span class="nc" id="L64">                        .data(Map.of(&quot;isNewVerificationTokenGenerated&quot;, true))</span>
+<span class="nc" id="L65">                        .message(requestStatus.get(&quot;success&quot;))</span>
+<span class="nc" id="L66">                        .status(OK)</span>
+<span class="nc" id="L67">                        .build()</span>
+        );
+    }
+
+    @GetMapping(&quot;verify-email/{token}&quot;)
+    public ResponseEntity&lt;ApiResponse&gt; verifyEmail(@PathVariable String token) {
+<span class="nc" id="L73">        Map&lt;String, String&gt; verificationStatus = userService.verifyEmail(token);</span>
+<span class="nc" id="L74">        return ResponseEntity.ok(</span>
+<span class="nc" id="L75">                ApiResponse.builder()</span>
+<span class="nc" id="L76">                        .timeStamp(LocalDateTime.now())</span>
+<span class="nc" id="L77">                        .data(Map.of(&quot;isEmailVerified&quot;, true))</span>
+<span class="nc" id="L78">                        .message(verificationStatus.get(&quot;success&quot;))</span>
+<span class="nc" id="L79">                        .status(OK)</span>
+<span class="nc" id="L80">                        .build()</span>
+        );
+    }
+
+    @PostMapping(&quot;login&quot;)
+    public ResponseEntity&lt;ApiResponse&gt; userLogin(@Valid @RequestBody LoginRequest loginRequest) {
+<span class="nc" id="L86">        JwtAuthResponse jwtAuthResponse = userService.login(loginRequest);</span>
+<span class="nc" id="L87">        return ResponseEntity.ok(</span>
+<span class="nc" id="L88">                ApiResponse.builder()</span>
+<span class="nc" id="L89">                        .timeStamp(LocalDateTime.now())</span>
+<span class="nc" id="L90">                        .data(Map.of(&quot;JwtResponse&quot;, jwtAuthResponse))</span>
+<span class="nc" id="L91">                        .message(&quot;Login Successful !!!&quot;)</span>
+<span class="nc" id="L92">                        .status(OK)</span>
+<span class="nc" id="L93">                        .build()</span>
+        );
+    }
+
+    @PostMapping(&quot;refresh/token&quot;)
+    public ResponseEntity&lt;ApiResponse&gt; refreshToken(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) {
+<span class="nc" id="L99">        return ResponseEntity.ok(</span>
+<span class="nc" id="L100">                ApiResponse.builder()</span>
+<span class="nc" id="L101">                        .timeStamp(LocalDateTime.now())</span>
+<span class="nc" id="L102">                        .data(Map.of(&quot;JwtResponse&quot;, userService.refreshToken(refreshTokenRequest)))</span>
+<span class="nc" id="L103">                        .message(&quot;Jwt Refreshed !!!&quot;)</span>
+<span class="nc" id="L104">                        .status(OK)</span>
+<span class="nc" id="L105">                        .build()</span>
+        );
+    }
+
+    @PostMapping(&quot;token/validate&quot;)
+    public ResponseEntity&lt;UserDto&gt; validateToken(@RequestParam String token) {
+<span class="nc" id="L111">        log.info(&quot;Trying to validate token {}&quot;, token);</span>
+<span class="nc" id="L112">        return ResponseEntity.ok(userService.validateToken(token));</span>
+    }
+
+    @PostMapping(&quot;forget-password/generate-token&quot;)
+    public ResponseEntity&lt;ApiResponse&gt; generateToken(@Valid @RequestBody EmailRequest emailRequest) {
+<span class="nc" id="L117">        Map&lt;String, String&gt; resetTokenGenerationStatus = passwordResetService.generatePasswordResetToken(emailRequest);</span>
+<span class="nc" id="L118">        return ResponseEntity.ok(</span>
+<span class="nc" id="L119">                ApiResponse.builder()</span>
+<span class="nc" id="L120">                        .timeStamp(LocalDateTime.now())</span>
+<span class="nc" id="L121">                        .data(Map.of(&quot;isResetTokenCreated&quot;, true))</span>
+<span class="nc" id="L122">                        .message(resetTokenGenerationStatus.get(&quot;success&quot;))</span>
+<span class="nc" id="L123">                        .status(OK)</span>
+<span class="nc" id="L124">                        .build()</span>
+        );
+    }
+
+    @PostMapping(&quot;forget-password/reset-password&quot;)
+    public ResponseEntity&lt;ApiResponse&gt; resetPassword(@Valid @RequestBody PasswordResetRequest passwordResetRequest) {
+<span class="nc" id="L130">        Map&lt;String, String&gt; resetAccountPasswordStatus = passwordResetService.resetAccountPassword(passwordResetRequest);</span>
+<span class="nc" id="L131">        return ResponseEntity.ok(</span>
+<span class="nc" id="L132">                ApiResponse.builder()</span>
+<span class="nc" id="L133">                        .timeStamp(LocalDateTime.now())</span>
+<span class="nc" id="L134">                        .data(Map.of(&quot;isPasswordReseted&quot;, true))</span>
+<span class="nc" id="L135">                        .message(resetAccountPasswordStatus.get(&quot;success&quot;))</span>
+<span class="nc" id="L136">                        .status(OK)</span>
+<span class="nc" id="L137">                        .build()</span>
+        );
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

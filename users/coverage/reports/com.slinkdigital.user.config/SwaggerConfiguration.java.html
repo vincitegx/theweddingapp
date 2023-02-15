@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SwaggerConfiguration.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">users</a> &gt; <a href="index.source.html" class="el_package">com.slinkdigital.user.config</a> &gt; <span class="el_source">SwaggerConfiguration.java</span></div><h1>SwaggerConfiguration.java</h1><pre class="source lang-java linenums">package com.slinkdigital.user.config;
+
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.ExternalDocumentation;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.License;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ *
+ * @author TEGA
+ */
+@Configuration
+<span class="nc" id="L17">public class SwaggerConfiguration {</span>
+
+    @Value(&quot;${organization.properties.name}&quot;)
+    private String organizationName;
+
+    @Value(&quot;${organization.properties.mail}&quot;)
+    private String organizationMail;
+
+    @Value(&quot;${organization.properties.website.url}&quot;)
+    private String organizationUrl;
+
+    @Value(&quot;${project.api.title}&quot;)
+    private String projectApiTitle;
+
+    @Value(&quot;${project.api.version}&quot;)
+    private String projectApiVersion;
+
+    @Value(&quot;${project.api.description}&quot;)
+    private String projectApiDescription;
+
+    @Value(&quot;${project.license}&quot;)
+    private String projectLicense;
+
+    @Bean
+    public OpenAPI api() {
+<span class="nc" id="L42">        return new OpenAPI()</span>
+<span class="nc" id="L43">                .info(new Info().title(projectApiTitle)</span>
+<span class="nc" id="L44">                        .description(projectApiDescription)</span>
+<span class="nc" id="L45">                        .version(projectApiVersion)</span>
+<span class="nc" id="L46">                        .license(new License().name(&quot;Apache 2.0&quot;).url(&quot;http://springdoc.org&quot;)))</span>
+<span class="nc" id="L47">                .externalDocs(new ExternalDocumentation()</span>
+<span class="nc" id="L48">                        .description(projectApiDescription));</span>
+    }
+
+    @Bean
+    public ModelMapper modelMapper() {
+<span class="nc" id="L53">        return new ModelMapper();</span>
+    }
+    
+//    @Bean
+//    public Docket weddingAppApi() {
+//        return new Docket(DocumentationType.SWAGGER_2)
+//                .select()
+//                .apis(RequestHandlerSelectors.any())
+//                .paths(PathSelectors.any())
+//                .build()
+//                .apiInfo(getApiInfo());
+//    }
+//
+//    private ApiInfo getApiInfo() {
+//        return new ApiInfoBuilder()
+//                .title(projectApiTitle)
+//                .version(projectApiVersion)
+//                .description(projectApiDescription)
+//                .contact(new Contact(organizationName, organizationUrl, organizationMail))
+//                .license(projectLicense)
+//                .build();
+//    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

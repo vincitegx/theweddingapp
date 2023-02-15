@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmailVerificationToken.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">users</a> &gt; <a href="index.source.html" class="el_package">com.slinkdigital.user.domain</a> &gt; <span class="el_source">EmailVerificationToken.java</span></div><h1>EmailVerificationToken.java</h1><pre class="source lang-java linenums">package com.slinkdigital.user.domain;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+/**
+ *
+ * @author TEGA
+ */
+@Entity
+<span class="nc bnc" id="L23" title="All 46 branches missed.">@Data</span>
+<span class="nc" id="L24">@Builder</span>
+<span class="nc" id="L25">@AllArgsConstructor</span>
+<span class="fc" id="L26">@NoArgsConstructor</span>
+@Table(name = &quot;email_verification_token&quot;, uniqueConstraints = {
+		@UniqueConstraint(columnNames = &quot;token&quot;, name=&quot;uniqueTokenContraint&quot;)
+})
+public class EmailVerificationToken implements Serializable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+<span class="nc" id="L34">    private Long id;</span>
+
+    @Column(nullable = false)
+<span class="nc" id="L37">    private String token;</span>
+
+    @ManyToOne
+<span class="nc" id="L40">    private Users user;</span>
+
+    @Column(nullable = false)
+<span class="nc" id="L43">    protected LocalDateTime createdAt;</span>
+
+    @Column(nullable = false)
+<span class="nc" id="L46">    private LocalDateTime expiresAt;</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoginAttemptService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">users</a> &gt; <a href="index.source.html" class="el_package">com.slinkdigital.user.service.impl</a> &gt; <span class="el_source">LoginAttemptService.java</span></div><h1>LoginAttemptService.java</h1><pre class="source lang-java linenums">package com.slinkdigital.user.service.impl;
+
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.slinkdigital.user.exception.UserException;
+import org.springframework.stereotype.Service;
+
+import java.util.concurrent.ExecutionException;
+
+import static java.util.concurrent.TimeUnit.MINUTES;
+
+@Service
+public class LoginAttemptService {
+    private static final int MAXIMUM_NUMBER_OF_ATTEMPTS = 5;
+    private static final int ATTEMPT_INCREMENT = 1;
+    private final LoadingCache&lt;String, Integer&gt; loginAttemptCache;
+
+    public LoginAttemptService() {
+<span class="nc" id="L20">        super();</span>
+<span class="nc" id="L21">        loginAttemptCache = CacheBuilder.newBuilder().expireAfterWrite(15, MINUTES)</span>
+<span class="nc" id="L22">                .maximumSize(100).build(new CacheLoader&lt;String, Integer&gt;() {</span>
+                    @Override
+                    public Integer load(String key) {
+<span class="nc" id="L25">                        return 0;</span>
+                    }
+                });
+<span class="nc" id="L28">    }</span>
+
+    public void evictUserFromLoginAttemptCache(String username) {
+<span class="nc" id="L31">        loginAttemptCache.invalidate(username);</span>
+<span class="nc" id="L32">    }</span>
+
+    public void addUserToLoginAttemptCache(String username) {
+<span class="nc" id="L35">        int attempts = 0;</span>
+        try {
+<span class="nc" id="L37">            attempts = ATTEMPT_INCREMENT + loginAttemptCache.get(username);</span>
+<span class="nc" id="L38">        } catch (ExecutionException ex) {</span>
+<span class="nc" id="L39">            throw new UserException(ex.getMessage());</span>
+<span class="nc" id="L40">        }</span>
+<span class="nc" id="L41">        loginAttemptCache.put(username, attempts);</span>
+<span class="nc" id="L42">    }</span>
+
+    public boolean hasExceededMaxAttempts(String username) {
+        try {
+<span class="nc bnc" id="L46" title="All 2 branches missed.">            return loginAttemptCache.get(username) &gt;= MAXIMUM_NUMBER_OF_ATTEMPTS;</span>
+<span class="nc" id="L47">        } catch (ExecutionException ex) {</span>
+<span class="nc" id="L48">            throw new UserException(ex.getMessage());</span>
+        }
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">users</a> &gt; <a href="index.source.html" class="el_package">com.slinkdigital.user.service.impl</a> &gt; <span class="el_source">UserServiceImpl.java</span></div><h1>UserServiceImpl.java</h1><pre class="source lang-java linenums">package com.slinkdigital.user.service.impl;
+
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import static com.auth0.jwt.algorithms.Algorithm.HMAC256;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.slinkdigital.user.constant.DefaultRoles;
+import static com.slinkdigital.user.constant.SecurityConstant.WEDDING_APP;
+import com.slinkdigital.user.domain.Users;
+import com.slinkdigital.user.domain.EmailVerificationToken;
+import com.slinkdigital.user.domain.RefreshToken;
+import com.slinkdigital.user.domain.security.Role;
+import com.slinkdigital.user.dto.UserDto;
+import com.slinkdigital.user.dto.EmailRequest;
+import com.slinkdigital.user.dto.EventDto;
+import com.slinkdigital.user.dto.JwtAuthResponse;
+import com.slinkdigital.user.dto.LoginRequest;
+import com.slinkdigital.user.dto.RefreshTokenRequest;
+import com.slinkdigital.user.dto.RegisterRequest;
+import com.slinkdigital.user.dto.UpdatePasswordRequest;
+import com.slinkdigital.user.dto.UserRequest;
+import com.slinkdigital.user.exception.UserException;
+import com.slinkdigital.user.repository.EmailVerificationTokenRepository;
+import com.slinkdigital.user.repository.RefreshTokenRepository;
+import com.slinkdigital.user.repository.RoleRepository;
+import com.slinkdigital.user.security.JwtProvider;
+import com.slinkdigital.user.service.EmailVerificationService;
+import com.slinkdigital.user.service.RefreshTokenService;
+import com.slinkdigital.user.validator.EmailValidator;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.slinkdigital.user.repository.UserRepository;
+import com.slinkdigital.user.service.UserService;
+import java.util.ArrayList;
+import java.util.Date;
+import static java.util.Arrays.stream;
+import java.util.Collection;
+import javax.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+/**
+ *
+ * @author TEGA
+ */
+@Service
+<span class="nc" id="L71">@RequiredArgsConstructor</span>
+<span class="nc" id="L72">@Slf4j</span>
+@Transactional
+public class UserServiceImpl implements UserService {
+
+    private final UserRepository userRepository;
+    private final EmailVerificationTokenRepository emailVerificationTokenRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final EmailVerificationService emailVerificationService;
+    private final JwtProvider jwtProvider;
+    private final AuthenticationManager authenticationManager;
+    private final RefreshTokenService refreshTokenService;
+    private final EmailValidator emailValidator;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final HttpServletRequest request;
+    @Value(&quot;${organization.properties.mail}&quot;)
+    private String organizationEmail;
+    private final KafkaTemplate&lt;String, EventDto&gt; kakfaTemplate;
+
+    @Override
+    public Map&lt;String, String&gt; registerUser(RegisterRequest registerRequest) {
+        try {
+<span class="nc" id="L94">            Map&lt;String, String&gt; registrationStatus = new HashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">            if (!emailValidator.test(registerRequest.getEmail())) {</span>
+<span class="nc" id="L96">                throw new UserException(registerRequest.getEmail() + &quot; is not valid&quot;);</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">            } else if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {</span>
+<span class="nc" id="L98">                throw new UserException(&quot;Email has already been used&quot;);</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">            } else if (!(registerRequest.getPassword().equals(registerRequest.getConfirmPassword()))) {</span>
+<span class="nc" id="L100">                throw new UserException(&quot;Passwords Doesn't Match&quot;);</span>
+            } else {
+<span class="nc" id="L102">                Users user = Users.builder()</span>
+<span class="nc" id="L103">                        .email(registerRequest.getEmail())</span>
+<span class="nc" id="L104">                        .password(passwordEncoder.encode(registerRequest.getPassword()))</span>
+<span class="nc" id="L105">                        .createdAt(LocalDateTime.now())</span>
+<span class="nc" id="L106">                        .build();</span>
+<span class="nc" id="L107">                user = userRepository.saveAndFlush(user);</span>
+<span class="nc" id="L108">                UserDto userDto = mapUserToDto(user);</span>
+<span class="nc" id="L109">                String token = emailVerificationService.registerVerificationTokenToDb(userDto);</span>
+<span class="nc" id="L110">                registrationStatus.put(&quot;success&quot;, &quot;Thank you for signing up, A verification link has been sent to your email &quot; + userDto.getEmail() + &quot; : &quot; + token);</span>
+            }
+<span class="nc" id="L112">            return registrationStatus;</span>
+<span class="nc" id="L113">        } catch (RuntimeException ex) {</span>
+<span class="nc" id="L114">            throw new UserException(ex.getMessage());</span>
+        }
+    }
+
+    @Override
+    public Map&lt;String, String&gt; verifyEmail(String token) {
+        try {
+<span class="nc" id="L121">            Map&lt;String, String&gt; verificationStatus = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L122">            Optional&lt;EmailVerificationToken&gt; verificationToken = emailVerificationTokenRepository.findByToken(token);</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">            if (verificationToken.isEmpty()) {</span>
+<span class="nc" id="L124">                throw new UserException(&quot;Token does not exist !!!&quot;);</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">            } else if (verificationToken.get().getExpiresAt().isBefore(LocalDateTime.now())) {</span>
+<span class="nc" id="L126">                throw new TokenExpiredException(&quot;Token Expired !!!&quot;);</span>
+            } else {
+<span class="nc" id="L128">                EmailVerificationToken v = verificationToken.get();</span>
+<span class="nc" id="L129">                fetchUserEnableAndAssignDefaultRole(v);</span>
+<span class="nc" id="L130">                emailVerificationTokenRepository.delete(v);</span>
+<span class="nc" id="L131">                verificationStatus.put(&quot;success&quot;, &quot;Congratulations !!! Your email has been verified and your account activated. You can log in to your account...&quot;);</span>
+            }
+<span class="nc" id="L133">            return verificationStatus;</span>
+<span class="nc" id="L134">        } catch (TokenExpiredException | UserException ex) {</span>
+<span class="nc" id="L135">            throw new UserException(ex.getMessage());</span>
+        }
+    }
+
+    private void fetchUserEnableAndAssignDefaultRole(EmailVerificationToken emailVerificationToken) {
+        try {
+<span class="nc" id="L141">            String email = emailVerificationToken.getUser().getEmail();</span>
+<span class="nc" id="L142">            Users user = findByEmail(email);</span>
+<span class="nc" id="L143">            user.setIsEnabled(true);</span>
+<span class="nc" id="L144">            user.setIsNonLocked(true);</span>
+<span class="nc" id="L145">            user.setRoles(setDefaultRole());</span>
+<span class="nc" id="L146">            userRepository.save(user);</span>
+<span class="nc" id="L147">        } catch (RuntimeException ex) {</span>
+<span class="nc" id="L148">            throw new UserException(ex.getMessage());</span>
+<span class="nc" id="L149">        }</span>
+<span class="nc" id="L150">    }</span>
+
+    @Override
+    public Map&lt;String, String&gt; requestNewVerificationToken(EmailRequest emailRequest) {
+        try {
+<span class="nc" id="L155">            Map&lt;String, String&gt; requestStatus = new HashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L156" title="All 2 branches missed.">            if (!emailValidator.test(emailRequest.getEmail())) {</span>
+<span class="nc" id="L157">                throw new UserException(emailRequest.getEmail() + &quot; is not valid&quot;);</span>
+<span class="nc bnc" id="L158" title="All 2 branches missed.">            } else if (userRepository.findByEmail(emailRequest.getEmail()).isEmpty()) {</span>
+<span class="nc" id="L159">                throw new UsernameNotFoundException(&quot;This email has not been registered. Visit the registration page to register an account...&quot;);</span>
+            } else {
+<span class="nc" id="L161">                Users user = userRepository.findByEmail(emailRequest.getEmail()).get();</span>
+<span class="nc" id="L162">                UserDto userDto = mapUserToDto(user);</span>
+<span class="nc" id="L163">                String token = emailVerificationService.registerVerificationTokenToDb(userDto);</span>
+<span class="nc" id="L164">                requestStatus.put(&quot;success&quot;, &quot;A new verification link has been sent to your email &quot; + userDto.getEmail() + &quot; : &quot; + token);</span>
+            }
+<span class="nc" id="L166">            return requestStatus;</span>
+<span class="nc" id="L167">        } catch (UserException | UsernameNotFoundException ex) {</span>
+<span class="nc" id="L168">            throw new UserException(ex.getMessage());</span>
+        }
+    }
+
+    @Override
+    public JwtAuthResponse login(LoginRequest loginRequest) {
+        try {
+<span class="nc" id="L175">            Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));</span>
+<span class="nc" id="L176">            SecurityContextHolder.getContext().setAuthentication(authenticate);</span>
+<span class="nc" id="L177">            String token = jwtProvider.generateJwtToken(authenticate);</span>
+<span class="nc" id="L178">            Users user = getCurrentUser();</span>
+<span class="nc" id="L179">            return JwtAuthResponse.builder()</span>
+<span class="nc" id="L180">                    .authToken(token)</span>
+<span class="nc" id="L181">                    .user(mapUserToDto(user))</span>
+<span class="nc" id="L182">                    .refreshToken(refreshTokenService.generateRefreshToken(user))</span>
+<span class="nc" id="L183">                    .build();</span>
+<span class="nc" id="L184">        } catch (AuthenticationException ex) {</span>
+<span class="nc" id="L185">            throw new UserException(ex.getMessage());</span>
+        }
+    }
+
+    @Override
+    @Cacheable(cacheNames = &quot;userdto&quot;)
+    public UserDto validateToken(String token) {
+        try {
+<span class="nc" id="L193">            Algorithm algorithm = HMAC256(jwtProvider.getSecret().getBytes());</span>
+<span class="nc" id="L194">            JWTVerifier verifier = JWT.require(algorithm).withIssuer(WEDDING_APP).build();</span>
+<span class="nc" id="L195">            DecodedJWT decodedJWT = verifier.verify(token);</span>
+<span class="nc" id="L196">            boolean isExpired = decodedJWT.getExpiresAt().before(new Date());</span>
+<span class="nc" id="L197">            String email = decodedJWT.getSubject();</span>
+<span class="nc" id="L198">            String[] roles = decodedJWT.getClaim(&quot;roles&quot;).asArray(String.class);</span>
+<span class="nc" id="L199">            Collection&lt;SimpleGrantedAuthority&gt; authorities = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L200">            stream(roles).forEach(role -&gt; {</span>
+<span class="nc" id="L201">                authorities.add(new SimpleGrantedAuthority(role));</span>
+<span class="nc" id="L202">            });</span>
+<span class="nc" id="L203">            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(email,</span>
+                    null, authorities);
+<span class="nc" id="L205">            Authentication authentication2 = SecurityContextHolder.getContext().getAuthentication();</span>
+<span class="nc bnc" id="L206" title="All 4 branches missed.">            if (authentication.isAuthenticated() &amp;&amp; authentication2.isAuthenticated()) {</span>
+<span class="nc" id="L207">                Users user = userRepository.findByEmail(email).get();</span>
+<span class="nc" id="L208">                UserDto userDto = mapUserToDto(user);</span>
+<span class="nc" id="L209">                SecurityContextHolder.getContext().setAuthentication(authentication);</span>
+<span class="nc" id="L210">                return userDto;</span>
+            } else {
+<span class="nc" id="L212">                SecurityContextHolder.clearContext();</span>
+<span class="nc" id="L213">                authentication.setAuthenticated(false);</span>
+<span class="nc" id="L214">                throw new UserException(&quot;This user does not exist or is not logged in&quot;);</span>
+            }
+<span class="nc" id="L216">        } catch (JWTVerificationException | IllegalArgumentException ex) {</span>
+<span class="nc" id="L217">            throw new UserException(ex.getMessage());</span>
+        }
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Users getCurrentUser() {
+        try {
+            org.springframework.security.core.userdetails.User principal = (org.springframework.security.core.userdetails.User) SecurityContextHolder.
+<span class="nc" id="L226">                    getContext().getAuthentication().getPrincipal();</span>
+<span class="nc" id="L227">            Users user = findByEmail(principal.getUsername());</span>
+<span class="nc" id="L228">            return user;</span>
+<span class="nc" id="L229">        } catch (RuntimeException ex) {</span>
+<span class="nc" id="L230">            throw new UserException(ex.getMessage());</span>
+        }
+    }
+
+    @Override
+    @CachePut(cacheNames = &quot;userdto&quot;)
+    public JwtAuthResponse refreshToken(RefreshTokenRequest refreshTokenRequest) {
+        try {
+<span class="nc" id="L238">            RefreshToken refreshToken = validateRefreshToken(refreshTokenRequest);</span>
+<span class="nc" id="L239">            String token = jwtProvider.generateJwtToken(refreshToken);</span>
+<span class="nc" id="L240">            return JwtAuthResponse.builder()</span>
+<span class="nc" id="L241">                    .authToken(token)</span>
+<span class="nc" id="L242">                    .refreshToken(refreshTokenRequest.getRefreshToken())</span>
+<span class="nc" id="L243">                    .user(refreshTokenRequest.getUser())</span>
+<span class="nc" id="L244">                    .build();</span>
+<span class="nc" id="L245">        } catch (RuntimeException ex) {</span>
+<span class="nc" id="L246">            throw new UserException(ex.getMessage());</span>
+        }
+    }
+
+    private RefreshToken validateRefreshToken(RefreshTokenRequest refreshTokenRequest) {
+        try {
+<span class="nc" id="L252">            RefreshToken refreshToken = refreshTokenRepository.findByToken(refreshTokenRequest.getRefreshToken())</span>
+<span class="nc" id="L253">                    .orElseThrow(() -&gt; new UserException(&quot;Invalid refresh Token&quot;));</span>
+<span class="nc bnc" id="L254" title="All 2 branches missed.">            if (refreshToken.getExpiryDate().compareTo(Instant.now()) &lt; 0) {</span>
+<span class="nc" id="L255">                refreshTokenRepository.delete(refreshToken);</span>
+<span class="nc" id="L256">                throw new UserException(&quot;Refresh token was expired. Please make a new signin request&quot;);</span>
+            }
+<span class="nc" id="L258">            UserDto user = mapUserToDto(refreshToken.getUser());</span>
+<span class="nc bnc" id="L259" title="All 2 branches missed.">            if (!user.equals(refreshTokenRequest.getUser())) {</span>
+<span class="nc" id="L260">                throw new UserException(&quot;You will need to login again&quot;);</span>
+            }
+<span class="nc" id="L262">            return refreshToken;</span>
+<span class="nc" id="L263">        } catch (UserException ex) {</span>
+<span class="nc" id="L264">            throw new UserException(ex.getMessage());</span>
+        }
+    }
+
+    @Override
+    @CacheEvict(cacheNames = &quot;userdto&quot;)
+    public Boolean logout(RefreshTokenRequest refreshTokenRequest) {
+        try {
+<span class="nc" id="L272">            SecurityContextHolder.clearContext();</span>
+<span class="nc" id="L273">            return refreshTokenService.deleteRefreshToken(refreshTokenRequest.getRefreshToken());</span>
+<span class="nc" id="L274">        } catch (RuntimeException ex) {</span>
+<span class="nc" id="L275">            throw new UserException(ex.getMessage());</span>
+        }
+    }
+    
+    @Override
+    public Map&lt;String, String&gt; sendMessageToAdmin(UserRequest userRequest) {
+        try{
+<span class="nc" id="L282">            Map&lt;String, String&gt; data = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L283">            data.put(&quot;message&quot;, userRequest.getMessage());</span>
+<span class="nc" id="L284">            EventDto eventDto = EventDto.builder().from(userRequest.getEmail()).to(organizationEmail).data(data).build();</span>
+<span class="nc" id="L285">            kakfaTemplate.send(&quot;email-to-admin&quot;, eventDto);</span>
+<span class="nc" id="L286">            return data;</span>
+<span class="nc" id="L287">        }catch(RuntimeException ex){</span>
+<span class="nc" id="L288">            throw new UserException(ex.getMessage());</span>
+        }
+    }
+
+    @Override
+    public Map&lt;String, String&gt; updatePassword(UpdatePasswordRequest updatePasswordRequest) {
+        try{
+<span class="nc" id="L295">            Map&lt;String, String&gt; updateStatus = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L296">            Users user = userRepository.findById(Long.parseLong(getLoggedInUserId())).orElseThrow(()-&gt; new UserException(&quot;Cannot Identify The User, Therefore operation cannot be performed&quot;));</span>
+<span class="nc bnc" id="L297" title="All 2 branches missed.">            if(!passwordEncoder.matches(updatePasswordRequest.getCurrentPassword(), user.getPassword())){</span>
+<span class="nc" id="L298">                throw new UserException(&quot;Current password field is incorrect&quot;);</span>
+<span class="nc bnc" id="L299" title="All 2 branches missed.">            }else if(!updatePasswordRequest.getNewPassword().equals(updatePasswordRequest.getConfirmPassword())){</span>
+<span class="nc" id="L300">                throw new UserException(&quot;New password doesnt match confirm password field&quot;);</span>
+            }else{
+<span class="nc" id="L302">                user.setPassword(passwordEncoder.encode(updatePasswordRequest.getNewPassword()));</span>
+<span class="nc" id="L303">                userRepository.saveAndFlush(user);</span>
+<span class="nc" id="L304">                updateStatus.put(&quot;success&quot;, &quot;Password updated successfully&quot;);</span>
+            }
+<span class="nc" id="L306">            return updateStatus;</span>
+<span class="nc" id="L307">        }catch(UserException ex){</span>
+<span class="nc" id="L308">            throw new UserException(ex.getMessage());</span>
+        }
+    }
+    
+    @Override
+    public List&lt;UserDto&gt; getAllUsers() {
+        try {
+<span class="nc" id="L315">            return userRepository.findAll().stream().map(this::mapUserToDto).toList();</span>
+<span class="nc" id="L316">        } catch (RuntimeException ex) {</span>
+<span class="nc" id="L317">            throw new UserException(ex.getMessage());</span>
+        }
+    }
+
+    private Set&lt;Role&gt; setDefaultRole() {
+        try {
+<span class="nc" id="L323">            Role role = roleRepository.findByName(DefaultRoles.DEFAULT_ROLE);</span>
+<span class="nc" id="L324">            Set&lt;Role&gt; roles = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L325">            roles.add(role);</span>
+<span class="nc" id="L326">            return roles;</span>
+<span class="nc" id="L327">        } catch (RuntimeException ex) {</span>
+<span class="nc" id="L328">            throw new UserException(ex.getMessage());</span>
+        }
+    }
+
+    @Override
+    public UserDto searchUser(String email) {
+        try {
+<span class="nc" id="L335">            Users user = findByEmail(email);</span>
+<span class="nc" id="L336">            UserDto userDto = mapUserToDto(user);</span>
+<span class="nc" id="L337">            return userDto;</span>
+<span class="nc" id="L338">        } catch (RuntimeException ex) {</span>
+<span class="nc" id="L339">            throw new UserException(ex.getMessage());</span>
+        }
+    }
+
+    private Users findByEmail(String email) {
+        try {
+<span class="nc" id="L345">            Users user = userRepository.findByEmail(email)</span>
+<span class="nc" id="L346">                    .orElseThrow(() -&gt; new UsernameNotFoundException(&quot;User not found with email - &quot; + email));</span>
+<span class="nc" id="L347">            return user;</span>
+<span class="nc" id="L348">        } catch (UsernameNotFoundException ex) {</span>
+<span class="nc" id="L349">            throw new UserException(ex.getMessage());</span>
+        }
+    }
+
+    @Override
+    public UserDto mapUserToDto(Users user) {
+        try {
+<span class="nc" id="L356">            Set&lt;String&gt; roles = getUserRoles(user);</span>
+<span class="nc" id="L357">            UserDto userDto = UserDto.builder().email(user.getEmail()).id(user.getId()).roles(roles).build();</span>
+<span class="nc" id="L358">            return userDto;</span>
+<span class="nc" id="L359">        } catch (RuntimeException ex) {</span>
+<span class="nc" id="L360">            throw new UserException(ex.getMessage());</span>
+        }
+    }
+
+    private Set&lt;String&gt; getUserRoles(Users user) {
+        try {
+<span class="nc" id="L366">            Set&lt;String&gt; roles = new HashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L367" title="All 2 branches missed.">            if (user.getRoles().isEmpty()) {</span>
+<span class="nc" id="L368">                return roles;</span>
+            } else {
+<span class="nc" id="L370">                user.getRoles().forEach((role) -&gt; {</span>
+<span class="nc" id="L371">                    roles.add(role.getName());</span>
+<span class="nc" id="L372">                });</span>
+<span class="nc" id="L373">                return roles;</span>
+            }
+<span class="nc" id="L375">        } catch (RuntimeException ex) {</span>
+<span class="nc" id="L376">            throw new UserException(ex.getMessage());</span>
+        }
+    }
+
+    @Override
+    public void addRoleCouple(List&lt;Long&gt; couple) {
+        try {
+<span class="nc" id="L383">            Role role = roleRepository.findByName(DefaultRoles.ROLE_COUPLE);</span>
+<span class="nc" id="L384">            couple.forEach((c) -&gt; {</span>
+<span class="nc" id="L385">                Users user = userRepository.findById(c).orElseThrow(()-&gt; new UserException(&quot;No user associated with this id:&quot;+ c));</span>
+<span class="nc" id="L386">                user.getRoles().add(role);</span>
+<span class="nc" id="L387">                userRepository.save(user);</span>
+<span class="nc" id="L388">            });</span>
+<span class="nc" id="L389">        } catch (RuntimeException ex) {</span>
+<span class="nc" id="L390">            throw new UserException(ex.getMessage());</span>
+<span class="nc" id="L391">        }</span>
+<span class="nc" id="L392">    }</span>
+    
+    private String getLoggedInUserId() {
+        try {
+<span class="nc" id="L396">            return request.getHeader(&quot;x-id&quot;);</span>
+<span class="nc" id="L397">        } catch (RuntimeException ex) {</span>
+<span class="nc" id="L398">            throw new UserException(&quot;You Need To Be Logged In !!!&quot;);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>
