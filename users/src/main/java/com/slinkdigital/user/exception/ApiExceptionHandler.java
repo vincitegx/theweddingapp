@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import javax.persistence.NoResultException;
-import javax.validation.ConstraintViolationException;
+import jakarta.persistence.NoResultException;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -114,11 +114,6 @@ public class ApiExceptionHandler {
     public ResponseEntity<ApiResponse> methodNotSupportedException(HttpRequestMethodNotSupportedException exception) {
         HttpMethod supportedMethod = Objects.requireNonNull(exception.getSupportedHttpMethods()).iterator().next();
         return createApiResponse(METHOD_NOT_ALLOWED, String.format(METHOD_IS_NOT_ALLOWED, supportedMethod));
-    }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse> internalServerErrorException(Exception exception) {
-        return createApiResponse(INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR_MSG);
     }
 
     @ExceptionHandler(NoResultException.class)

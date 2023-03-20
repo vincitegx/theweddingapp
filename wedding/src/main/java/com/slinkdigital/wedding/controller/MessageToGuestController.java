@@ -7,7 +7,7 @@ import com.slinkdigital.wedding.service.MessageToGuestService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import static org.springframework.http.HttpStatus.OK;
 import org.springframework.http.ResponseEntity;

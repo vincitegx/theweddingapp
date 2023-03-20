@@ -1,7 +1,9 @@
 package com.slinkdigital.wedding.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.slinkdigital.wedding.dto.ApiResponse;
 import com.slinkdigital.wedding.dto.WeddingDto;
+import com.slinkdigital.wedding.exception.WeddingException;
 import com.slinkdigital.wedding.mapper.WeddingMapper;
 import com.slinkdigital.wedding.service.WeddingService;
 import java.io.IOException;
@@ -9,7 +11,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import javax.validation.Valid;
+import jakarta.validation.Valid;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -107,15 +111,19 @@ public class WeddingController {
 
     @PostMapping("{id}/publish")
     public ResponseEntity<ApiResponse> publishWedding(@PathVariable Long id) {
-        Map<String, String> publishStatus = weddingService.publishWedding(id);
-        return ResponseEntity.ok(
-                ApiResponse.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .data(Map.of("isWeddingPublished", true))
-                        .message(publishStatus.get("success"))
-                        .status(OK)
-                        .build()
-        );
+        try {
+            Map<String, String> publishStatus = weddingService.publishWedding(id);
+            return ResponseEntity.ok(
+                    ApiResponse.builder()
+                            .timeStamp(LocalDateTime.now())
+                            .data(Map.of("isWeddingPublished", true))
+                            .message(publishStatus.get("success"))
+                            .status(OK)
+                            .build()
+            );
+        } catch (JsonProcessingException ex) {
+            throw new WeddingException(ex.getMessage());
+        }
     }
 
     @PutMapping("info")

@@ -9,17 +9,31 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.context.annotation.Configuration;
 
 /**
  *
  * @author TEGA
  */
 @EnableWebSecurity
+@Configuration
 public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.csrf().disable().authorizeRequests().anyRequest().permitAll();
+        httpSecurity.cors().and()
+                .authorizeHttpRequests()
+                .requestMatchers("/resources/**", "/webjars/**", "/assests/**").permitAll()
+                .requestMatchers("/v3/api-docs",
+                        "/configuration/ui",
+                        "/swagger-resources/**",
+                        "/configuration/security",
+                        "/swagger-ui.html",
+                        "/swagger-ui/**",
+                        "/actuator/**"
+                ).permitAll()
+                .requestMatchers("/api/uu/v1/users/**").permitAll();
+        httpSecurity.csrf().disable();
         httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 //        httpSecurity.cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues());
         return httpSecurity.build();

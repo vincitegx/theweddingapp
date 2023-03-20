@@ -6,15 +6,7 @@ import com.slinkdigital.wedding.constant.WeddingType;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Date;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.Temporal;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -70,11 +62,11 @@ public class Wedding implements Serializable {
     protected LocalDateTime createdAt;
     
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @Temporal(javax.persistence.TemporalType.DATE)
+    @Temporal(jakarta.persistence.TemporalType.DATE)
     private Date dateOfWedding;
     
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @Temporal(javax.persistence.TemporalType.DATE)
+    @Temporal(jakarta.persistence.TemporalType.DATE)
     private Date publishDate;
     
     @Column(nullable = false)

@@ -1,12 +1,7 @@
 package com.slinkdigital.user.domain.security;
 
 import java.io.Serializable;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import lombok.AllArgsConstructor;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,16 +10,18 @@ import lombok.NoArgsConstructor;
  * @author TEGA
  */
 @Entity
+@Table(name = "roles")
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
-@Table(name = "roles")
 public class Role implements Serializable {
-    
+
+    private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roleId;
-    
+
+    @Column(nullable = false, unique = true)
     private String name;
 
     public Role(String name) {

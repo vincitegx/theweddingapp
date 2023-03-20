@@ -8,7 +8,7 @@ import com.slinkdigital.wedding.service.GuestSettingService;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

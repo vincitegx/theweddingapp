@@ -27,4 +27,5 @@ public class PostDto {
     
     private String caption;
     
+    private String type;
 }

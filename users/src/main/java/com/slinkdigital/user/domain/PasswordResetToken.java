@@ -3,11 +3,7 @@ package com.slinkdigital.user.domain;
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +14,9 @@ import lombok.NoArgsConstructor;
  * @author TEGA
  */
 @Entity
+@Table(name = "password_reset_token", indexes = {
+    @Index(columnList = "email, resetToken", unique = true, name = "unique_reset_token_index")
+})
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -28,13 +27,32 @@ public class PasswordResetToken implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
+    @Column(nullable = false, unique = true)
     private String email;
     
+    @Column(nullable = false, unique = true)
     private String resetToken;
     
-    protected Instant createdDate;
+    @Column(nullable = false, updatable = false)
+    protected Instant createdAt;
     
     @Column(nullable = false)
     private LocalDateTime expiresAt;
     
+    @ManyToOne
+    private Users user;
+    
+    public PasswordResetToken(String email, LocalDateTime expiresAt) {
+        this.email = email;
+        this.expiresAt = expiresAt;
+    }
+    
+    @PrePersist
+    protected void onCreate() {
+        createdAt = Instant.now();
+    }
+    
+    public boolean isExpired() {
+        return LocalDateTime.now().isAfter(expiresAt);
+    }
 }

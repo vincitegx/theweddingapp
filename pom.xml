@@ -14,9 +14,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <spring.boot.dependencies.version>2.7.0</spring.boot.dependencies.version>
-        <spring.cloud-version>2021.0.3</spring.cloud-version>
-        <spring.boot.maven.plugin.version>2.7.0</spring.boot.maven.plugin.version>
+        <spring.boot.dependencies.version>3.0.4</spring.boot.dependencies.version>
+        <spring.cloud-version>2022.0.1</spring.cloud-version>
+        <spring.boot.maven.plugin.version>3.0.4</spring.boot.maven.plugin.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -38,8 +38,30 @@
     </dependencyManagement>
     <dependencies>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-properties-migrator</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <!--        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-exporter-zipkin</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.zipkin.reporter2</groupId>
+            <artifactId>zipkin-sender-urlconnection</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.zipkin.reporter2</groupId>
+            <artifactId>zipkin-reporter-brave</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-reporter-wavefront</artifactId>
+        </dependency>-->
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -69,13 +91,35 @@
                     </executions>
                 </plugin>
                 <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>0.8.7</version>
+                    <configuration>
+                        <outputDirectory>coverage/reports</outputDirectory>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>report</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>		
+                <plugin>
                     <groupId>com.google.cloud.tools</groupId>
                     <artifactId>jib-maven-plugin</artifactId>
                     <version>3.3.0</version>
                     <configuration>
                         <from>
                             <image>openjdk:17-alpine@sha256:4b6abae565492dbe9e7a894137c966a7485154238902f2f25e9dbd9784383d81</image>
-<!--                            <platforms>
+                            <!--                            <platforms>
                                 <platform>
                                     <architecture>amd64</architecture>
                                     <os>windows</os>
@@ -124,15 +168,12 @@
         <module>discovery-service</module>
         <module>api-gateway</module>
         <module>wedding</module>
-<!--        <module>guests</module>-->
         <module>users</module>
         <module>feed</module>
-<!--        <module>budget</module>-->
         <module>vendor</module>
-        <module>blog</module>
         <module>mail-service</module>
         <module>file-service</module>
-        <module>config-service</module>
+        <!--<module>config-service</module>-->
         <module>admin</module>
     </modules>
 </project>

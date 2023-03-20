@@ -20,3 +20,6 @@ build/
 tokens/
 src/main/resources/*.json
 /*.pem
+/grafana/
+/jenkins/
+/local-data/

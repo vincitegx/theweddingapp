@@ -2,13 +2,13 @@ package com.slinkdigital.user.validator;
 
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 /**
  *
  * @author TEGA
  */
-@Component
+@Service
 public class EmailValidator implements Predicate<String> {
 
     private static final Predicate<String> IS_EMAIL_VALID =

@@ -1,2 +1,1 @@
 SELECT 'CREATE DATABASE weddingappusers' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'weddingappusers')\gexec
-SELECT 'CREATE DATABASE weddings' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'weddings')\gexec

@@ -27,7 +27,7 @@ public class ReactiveWebSocketHandler implements WebSocketHandler {
     public Mono<Void> handle(WebSocketSession webSocketSession) {
         return webSocketSession.send(kafkaService.getTestTopicFlux()
                 .map(record -> {
-                    Message message = new Message("[Test] Add message", record.value());
+                    Message message = new Message("[Test] Add message", record.toString());
 
                     try {
                         return json.writeValueAsString(message);

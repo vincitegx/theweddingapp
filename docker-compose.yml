@@ -1,5 +1,4 @@
----
-version: '3.8'
+version: '3'
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:7.0.1
@@ -7,17 +6,10 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
-
-  ## Eureka Server
-  discovery-service:
-    image: davidtega/discovery-service:latest
-    container_name: discovery-service
-    ports:
-      - "8761:8761"
-
-  postgres:
-    container_name: postgres
-    image: postgres
+  
+  postgres-user:
+    container_name: postgres-user
+    image: postgres:latest
     extra_hosts: [ 'host.docker.internal:host-gateway' ]
     environment:
       POSTGRES_DB: weddingappusers
@@ -25,31 +17,27 @@ services:
       POSTGRES_PASSWORD: dondot3056
       PGDATA: /data/postgres
     volumes:
-      - ./config/user-data.sql:/docker-entrypoint-initdb.d/user-data.sql:ro
       - ./local-data:/var/lib/postgresql/data
+      - ./config/user-data.sql:/docker-entrypoint-initdb.d/user-data.sql:ro
     ports:
       - "5432:5432"
     restart: unless-stopped
 
-  pgadmin:
-    container_name: pgadmin
-    image: dpage/pgadmin4
+  postgres-wedding:
+    container_name: postgres-wedding
+    image: postgres:latest
+    extra_hosts: [ 'host.docker.internal:host-gateway' ]
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      POSTGRES_DB: weddings
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: dondot3056
+      PGDATA: /data/postgres
+    volumes:
+      - ./local-data:/var/lib/postgresql/data
+      - ./config/wedding-data.sql:/docker-entrypoint-initdb.d/wedding-data.sql:ro
     ports:
-      - "5050:80"
-    depends_on:
-      - postgres
+      - "5431:5432"
     restart: unless-stopped
-
-  ## Zipkin
-  zipkin:
-    image: openzipkin/zipkin
-    container_name: zipkin
-    ports:
-      - "9411:9411"
 
   broker:
     image: confluentinc/cp-kafka:7.0.1
@@ -68,69 +56,27 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
     restart: unless-stopped
 
-  api-gateway:
-    image: davidtega/weddingapp-gateway:latest
-    container_name: api-gateway
-    ports:
-      - "8080:8080"
-    expose:
-      - "8080"
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY= TRACE
-    depends_on:
-      - discovery-service
-
   mailhog:
-      image: mailhog/mailhog
+      image: davidtega/mailhog
       container_name: 'mailhog'
       ports:
         - "1025:1025"
         - "8025:8025"
 
-  maildev:
-      container_name: maildev
-      image: djfarrelly/maildev
-      extra_hosts: [ 'host.docker.internal:host-gateway' ]
-      restart: always
-      ports:
-        - 80:80
-        - "25:25"
-
-  ## User-Service Docker Compose Config
-  user-service:
-    container_name: user-service
-    image: davidtega/weddingapp-user:latest
-    ports:
-      - "8082:8082"
+  pgadmin:
+    container_name: pgadmin-user
+    image: dpage/pgadmin4:latest
     environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/weddingappusers
-    volumes:
-      - ./config/role-data.sql:/docker-entrypoint-initdb.d/role-data.sql:ro
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
     depends_on:
-      - postgres
-      - discovery-service
-      - api-gateway
+      - postgres-user
+      - postgres-wedding
     restart: unless-stopped
 
-  ## Wedding-Service Docker Compose Config
-  wedding-service:
-    container_name: wedding-service
-    image: davidtega/weddingapp-wedding:latest
-    ports:
-      - "8083:8083"
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/weddings
-    depends_on:
-      - postgres
-      - discovery-service
-      - api-gateway
-      - user-service
-    restart: unless-stopped
-
-  ## Prometheus
   prometheus:
     image: prom/prometheus:v2.37.1
     container_name: prometheus
@@ -139,9 +85,6 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-    depends_on:
-      - user-service
-      - wedding-service
 
   grafana:
     image: grafana/grafana-oss:8.5.2
@@ -155,4 +98,4 @@ services:
       - ./grafana:/var/lib/grafana
     environment:
       - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=password
+      - GF_SECURITY_ADMIN_PASSWORD=admin

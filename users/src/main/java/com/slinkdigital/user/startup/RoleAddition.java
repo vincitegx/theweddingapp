@@ -20,7 +20,7 @@ public class RoleAddition implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-//        Role role = new Role("ROLE_COUPLE");
+//        Role role = new Role("ROLE_USER");
 //        roleRepository.save(role);
     }
 

@@ -1,13 +1,8 @@
 package com.slinkdigital.user.domain;
 
 import java.io.Serializable;
-import java.time.Instant;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import java.time.LocalDateTime;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,24 +12,36 @@ import lombok.NoArgsConstructor;
  * @author TEGA
  */
 @Entity
+@Table(name = "refresh_tokens")
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class RefreshToken implements Serializable{
+@AllArgsConstructor
+public class RefreshToken implements Serializable {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", updatable = false, nullable = false)
     private Long id;
     
-    @Column(nullable = false)
+    @Column(name = "token", nullable = false, unique = true)
     private String token;
     
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private Users user;
     
-    @Column(nullable = false)
-    protected Instant createdDate;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
     
-    @Column(nullable = false)
-    private Instant expiryDate;
+    @Column(name = "expiry_at", nullable = false)
+    private LocalDateTime expiresAt;
+    
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
+    
+    public boolean isExpired() {
+        return LocalDateTime.now().isAfter(expiresAt);
+    }
 }

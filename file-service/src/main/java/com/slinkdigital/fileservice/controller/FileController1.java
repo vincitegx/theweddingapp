@@ -2,7 +2,7 @@ package com.slinkdigital.fileservice.controller;
 
 import com.slinkdigital.fileservice.service.FileService;
 import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;

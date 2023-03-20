@@ -1,6 +1,6 @@
 package com.slinkdigital.user.listener;
 
-import com.slinkdigital.user.service.impl.LoginAttemptService;
+import com.slinkdigital.user.service.LoginAttemptService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;

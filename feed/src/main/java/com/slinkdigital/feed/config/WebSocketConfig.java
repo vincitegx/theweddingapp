@@ -13,15 +13,16 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+    
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic");
-        config.setApplicationDestinationPrefixes("/app");
+        config.enableSimpleBroker("/");
+        config.setApplicationDestinationPrefixes("/");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // ui client will use this to connect to the server
-        registry.addEndpoint("/ws-notification").setAllowedOrigins("http://localhost:4200").withSockJS();
+        registry.addEndpoint("/websocket").setAllowedOrigins("http://localhost:4200").withSockJS();
     }
 }

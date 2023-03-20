@@ -1,70 +1,113 @@
 package com.slinkdigital.apigateway.config;
 
+import com.slinkdigital.apigateway.exception.GatewayException;
+import io.swagger.v3.oas.models.ExternalDocumentation;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
+import org.springdoc.core.AbstractSwaggerUiConfigProperties;
+import org.springdoc.core.GroupedOpenApi;
+import org.springdoc.core.SwaggerUiConfigProperties;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.info.BuildProperties;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.cloud.gateway.route.RouteDefinitionLocator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import springfox.documentation.builders.ApiInfoBuilder;
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.service.Contact;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger.web.DocExpansion;
-import springfox.documentation.swagger.web.UiConfiguration;
-import springfox.documentation.swagger.web.UiConfigurationBuilder;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
+import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  *
  * @author TEGA
  */
 @Configuration
-@EnableSwagger2
+@Slf4j
 public class SwaggerConfig {
+
+    private static final String API_URI = "/v3/api-docs";
+
+    private final RouteDefinitionLocator locator;
+
+    public SwaggerConfig(RouteDefinitionLocator locator) {
+        this.locator = locator;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(
+            name = {"springdoc.use-management-port"},
+            havingValue = "false",
+            matchIfMissing = true
+    )
+    public GroupedOpenApi apis(SwaggerUiConfigProperties swaggerUiConfigProperties) {
+        try {
+            Set<AbstractSwaggerUiConfigProperties.SwaggerUrl> urls = new HashSet<>();
+            locator.getRouteDefinitions().subscribe(routeDefinition -> {
+                log.info("Discovered route definition: {}", routeDefinition);
+                String resourceName = routeDefinition.getId();
+//                String location = routeDefinition.getPredicates().get(0).getArgs().get("_genkey_0").replace("/**", API_URI);
+                String location = routeDefinition.getPredicates().get(0).getArgs().get("pattern").replace("/**", API_URI);
+                log.info("Adding swagger resource: {} with location {}", resourceName, location);
+                urls.add(new AbstractSwaggerUiConfigProperties.SwaggerUrl(resourceName, location, resourceName));
+            });
+            swaggerUiConfigProperties.setUrls(urls);
+            return GroupedOpenApi.builder()
+                    .group("resource")
+                    .pathsToMatch("/api/**")
+                    .build();
+        } catch (NullPointerException ex) {
+            log.info(ex.getLocalizedMessage());
+            throw new GatewayException(ex.getMessage());
+        }
+    }
+
+    @Bean
+    public OpenAPI api() {
+        return new OpenAPI()
+                .info(getApiInfo())
+                .externalDocs(new ExternalDocumentation()
+                        .description("Wedding API Documentation")
+                        .url("https://github.com/vincitegx/theweddingapp"));
+    }
+
+    @Bean
+    public ModelMapper modelMapper() {
+        return new ModelMapper();
+    }
 
     @Autowired
     Optional<BuildProperties> build;
 
-    @Bean
-    public Docket api() {
-        return new Docket(DocumentationType.SWAGGER_2)
-                .forCodeGeneration(true)
-                .useDefaultResponseMessages(false)
-                .apiInfo(getApiInfo())
-                .select()
-//                .apis(RequestHandlerSelectors.withClassAnnotation(RestController.class))
-                .apis(RequestHandlerSelectors.any())
-                .paths(PathSelectors.any())
-                .build();
-    }
-
-    private ApiInfo getApiInfo() {
+    private Info getApiInfo() {
         String version;
         if (build.isPresent()) {
             version = build.get().getVersion();
         } else {
             version = "1.0";
         }
-        return new ApiInfoBuilder()
+        Contact c = new Contact();
+        c.setName("David Tega");
+        c.setEmail("davidogbodu3056@gmail.com");
+        c.setUrl("https://weddingapp.com");
+        return new Info()
                 .title("Wedding App API")
                 .version(version)
                 .description("API-GATEWAY DOCUMENTATION FOR WEDDING APP")
-                .contact(new Contact("Slink Digital", "https://slinkdigital.com", "info@slinkdigital.com"))
-                .license("Apache 2.0")
-                .build();
+                .contact(c)
+                .license(new License().name("Apache 2.0").url("http://springdoc.org"));
     }
 
     @Bean
-    public UiConfiguration uiConfig() {
-        return UiConfigurationBuilder.builder().docExpansion(DocExpansion.LIST).build();
+    @LoadBalanced
+    public WebClient.Builder webClientBuilder() {
+        return WebClient.builder();
     }
-
-//    @Bean
-//    UiConfiguration uiConfig() {
-//        return new UiConfiguration("validatorUrl", "list", "alpha", "schema",
-//                UiConfiguration.Constants.DEFAULT_SUBMIT_METHODS, false, true, 60000L);
-//    }
 }

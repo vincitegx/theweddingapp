@@ -49,7 +49,7 @@ public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> 
                 }
                 return webClientBuilder.build()
                         .post()
-                        .uri("http://api-gateway/api/uu/v1/users/token/validate?token=" + parts[1])
+                        .uri("http://gateway-service/api/uu/v1/users/token/validate?token=" + parts[1])
                         .retrieve().bodyToMono(UserDto.class)
                         .map(user -> {
                             exchange.getRequest()

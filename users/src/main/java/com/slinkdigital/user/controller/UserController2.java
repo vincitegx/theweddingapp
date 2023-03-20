@@ -1,5 +1,6 @@
 package com.slinkdigital.user.controller;
 
+import com.slinkdigital.user.domain.Users;
 import com.slinkdigital.user.dto.ApiResponse;
 import com.slinkdigital.user.dto.UserDto;
 import com.slinkdigital.user.dto.EmailRequest;
@@ -8,11 +9,15 @@ import com.slinkdigital.user.dto.LoginRequest;
 import com.slinkdigital.user.dto.PasswordResetRequest;
 import com.slinkdigital.user.dto.RefreshTokenRequest;
 import com.slinkdigital.user.dto.RegisterRequest;
-import com.slinkdigital.user.service.PasswordResetService;
+import com.slinkdigital.user.service.AuthService;
+import com.slinkdigital.user.service.EmailVerificationService;
+import com.slinkdigital.user.service.PasswordService;
+import com.slinkdigital.user.service.RefreshTokenService;
+import com.slinkdigital.user.service.RoleService;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Map;
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import static org.springframework.http.HttpStatus.CREATED;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,11 +27,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import com.slinkdigital.user.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import static org.springframework.http.HttpStatus.OK;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  *
@@ -38,31 +47,34 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Slf4j
 public class UserController2 {
 
-    private final UserService userService;
-    private final PasswordResetService passwordResetService;
+    private final EmailVerificationService emailVerificationService;
+    private final PasswordService passwordService;
+    private final RoleService roleService;
+    private final AuthService authService;
+    private final RefreshTokenService refreshTokenService;
 
     @PostMapping
     public ResponseEntity<ApiResponse> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
-        Map<String, String> registrationStatus = userService.registerUser(registerRequest);
+        UserDto user = authService.registerUser(registerRequest);
+        log.info(user.toString());
+        String token = emailVerificationService.registerVerificationTokenToDb(user);
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/v1/users").toUriString());
         return ResponseEntity.created(uri).body(
                 ApiResponse.builder()
                         .timeStamp(LocalDateTime.now())
-                        .data(Map.of("isRegistered", true))
-                        .message(registrationStatus.get("success"))
+                        .data(Map.of("token", token))
                         .status(CREATED)
                         .build()
         );
     }
 
-    @PostMapping("request-new-verification-token")
+    @PutMapping("vtoken")
     public ResponseEntity<ApiResponse> requestNewVerificationToken(@Valid @RequestBody EmailRequest emailRequest) {
-        Map<String, String> requestStatus = userService.requestNewVerificationToken(emailRequest);
+        String token = emailVerificationService.requestNewVerificationToken(emailRequest);
         return ResponseEntity.ok(
                 ApiResponse.builder()
                         .timeStamp(LocalDateTime.now())
-                        .data(Map.of("isNewVerificationTokenGenerated", true))
-                        .message(requestStatus.get("success"))
+                        .data(Map.of("token", token))
                         .status(OK)
                         .build()
         );
@@ -70,12 +82,12 @@ public class UserController2 {
 
     @GetMapping("verify-email/{token}")
     public ResponseEntity<ApiResponse> verifyEmail(@PathVariable String token) {
-        Map<String, String> verificationStatus = userService.verifyEmail(token);
+        Users user = emailVerificationService.verifyEmail(token);
+        UserDto userDto = roleService.setDefaultRole(user);
         return ResponseEntity.ok(
                 ApiResponse.builder()
                         .timeStamp(LocalDateTime.now())
-                        .data(Map.of("isEmailVerified", true))
-                        .message(verificationStatus.get("success"))
+                        .data(Map.of("user", userDto))
                         .status(OK)
                         .build()
         );
@@ -83,7 +95,7 @@ public class UserController2 {
 
     @PostMapping("login")
     public ResponseEntity<ApiResponse> userLogin(@Valid @RequestBody LoginRequest loginRequest) {
-        JwtAuthResponse jwtAuthResponse = userService.login(loginRequest);
+        JwtAuthResponse jwtAuthResponse = authService.login(loginRequest);
         return ResponseEntity.ok(
                 ApiResponse.builder()
                         .timeStamp(LocalDateTime.now())
@@ -99,7 +111,7 @@ public class UserController2 {
         return ResponseEntity.ok(
                 ApiResponse.builder()
                         .timeStamp(LocalDateTime.now())
-                        .data(Map.of("JwtResponse", userService.refreshToken(refreshTokenRequest)))
+                        .data(Map.of("JwtResponse", refreshTokenService.refreshToken(refreshTokenRequest)))
                         .message("Jwt Refreshed !!!")
                         .status(OK)
                         .build()
@@ -109,12 +121,14 @@ public class UserController2 {
     @PostMapping("token/validate")
     public ResponseEntity<UserDto> validateToken(@RequestParam String token) {
         log.info("Trying to validate token {}", token);
-        return ResponseEntity.ok(userService.validateToken(token));
+        UserDto user = authService.validateToken(token);
+        log.info(user.toString());
+        return ResponseEntity.ok(user);
     }
 
     @PostMapping("forget-password/generate-token")
     public ResponseEntity<ApiResponse> generateToken(@Valid @RequestBody EmailRequest emailRequest) {
-        Map<String, String> resetTokenGenerationStatus = passwordResetService.generatePasswordResetToken(emailRequest);
+        Map<String, String> resetTokenGenerationStatus = passwordService.generatePasswordResetToken(emailRequest);
         return ResponseEntity.ok(
                 ApiResponse.builder()
                         .timeStamp(LocalDateTime.now())
@@ -127,7 +141,7 @@ public class UserController2 {
 
     @PostMapping("forget-password/reset-password")
     public ResponseEntity<ApiResponse> resetPassword(@Valid @RequestBody PasswordResetRequest passwordResetRequest) {
-        Map<String, String> resetAccountPasswordStatus = passwordResetService.resetAccountPassword(passwordResetRequest);
+        Map<String, String> resetAccountPasswordStatus = passwordService.resetAccountPassword(passwordResetRequest);
         return ResponseEntity.ok(
                 ApiResponse.builder()
                         .timeStamp(LocalDateTime.now())
@@ -136,5 +150,15 @@ public class UserController2 {
                         .status(OK)
                         .build()
         );
+    }
+    
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR, reason = "There was an error !!!")
+    public ApiResponse handleError(HttpServletRequest req, Exception ex) {
+        return ApiResponse.builder()
+                .timeStamp(LocalDateTime.now())
+                .message(ex.getMessage())
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .build();
     }
 }

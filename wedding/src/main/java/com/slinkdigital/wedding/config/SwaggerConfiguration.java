@@ -1,64 +1,58 @@
 package com.slinkdigital.wedding.config;
 
-import org.springframework.beans.factory.annotation.Value;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.ExternalDocumentation;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.License;
+import java.util.Optional;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import springfox.documentation.builders.ApiInfoBuilder;
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.service.Contact;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /**
  *
  * @author TEGA
  */
 @Configuration
-@EnableSwagger2
 public class SwaggerConfiguration {
 
-    @Value("${organization.properties.name}")
-    private String organizationName;
-
-    @Value("${organization.properties.mail}")
-    private String organizationMail;
-
-    @Value("${organization.properties.website.url}")
-    private String organizationUrl;
-
-    @Value("${project.api.title}")
-    private String projectApiTitle;
-
-    @Value("${project.api.version}")
-    private String projectApiVersion;
-
-    @Value("${project.api.description}")
-    private String projectApiDescription;
-
-    @Value("${project.license}")
-    private String projectLicense;
-
     @Bean
-    public Docket weddingAppApi() {
-        return new Docket(DocumentationType.SWAGGER_2)
-                .select()
-                .apis(RequestHandlerSelectors.any())
-                .paths(PathSelectors.any())
-                .build()
-                .apiInfo(getApiInfo());
+    public OpenAPI api() {
+        return new OpenAPI()
+                .info(getApiInfo())
+                .externalDocs(new ExternalDocumentation()
+                        .description("Wedding API Documentation")
+                        .url("https://github.com/vincitegx/theweddingapp"));
     }
 
-    private ApiInfo getApiInfo() {
-        return new ApiInfoBuilder()
-                .title(projectApiTitle)
-                .version(projectApiVersion)
-                .description(projectApiDescription)
-                .contact(new Contact(organizationName, organizationUrl, organizationMail))
-                .license(projectLicense)
-                .build();
+    @Bean
+    public ModelMapper modelMapper() {
+        return new ModelMapper();
+    }
+
+    @Autowired
+    Optional<BuildProperties> build;
+
+    private Info getApiInfo() {
+        String version;
+        if (build.isPresent()) {
+            version = build.get().getVersion();
+        } else {
+            version = "1.0";
+        }
+        Contact c = new Contact();
+        c.setName("David Tega");
+        c.setEmail("davidogbodu3056@gmail.com");
+        c.setUrl("https://weddingapp.com");
+        return new Info()
+                .title("Wedding App API")
+                .version(version)
+                .description("WEDDING DOCUMENTATION FOR WEDDING APP")
+                .contact(c)
+                .license(new License().name("Apache 2.0").url("http://springdoc.org"));
     }
 
 }

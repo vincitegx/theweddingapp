@@ -56,7 +56,7 @@ public class ErrorPageForwardFilter implements GatewayFilter, Ordered {
     }
 
     private HttpStatus getHttpStatus(ServerWebExchange exchange) {
-        return Optional.ofNullable(exchange.getResponse().getStatusCode())
+        return (HttpStatus) Optional.ofNullable(exchange.getResponse().getStatusCode())
                 .orElse(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

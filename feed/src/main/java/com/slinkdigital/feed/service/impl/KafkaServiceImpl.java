@@ -29,14 +29,14 @@ public class KafkaServiceImpl implements KafkaService {
         Properties kafkaProperties = PropertiesLoaderUtils.loadAllProperties("ccloud.properties");
 
         kafkaProperties.put(ConsumerConfig.CLIENT_ID_CONFIG, "reactive-consumer");
-        kafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, "sample-group");
+        kafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, "feed-group");
         kafkaProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         kafkaProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         kafkaProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         ReceiverOptions<String, String> receiverOptions = ReceiverOptions.create(kafkaProperties);
 
-        testTopicStream = createTopicCache(receiverOptions, "testTopic");
+        testTopicStream = createTopicCache(receiverOptions, "feed_topic");
     }
 
 
