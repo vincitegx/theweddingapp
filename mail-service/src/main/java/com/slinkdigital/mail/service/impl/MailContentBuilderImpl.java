@@ -25,6 +25,7 @@ public class MailContentBuilderImpl implements MailContentBuilder {
         context.setVariable("message", data.get("msg"));
         context.setVariable("subject", data.get("subject"));
         return templateEngine.process(data.get("template").toString(), context);
+
     }
 
 }

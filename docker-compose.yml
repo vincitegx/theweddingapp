@@ -64,7 +64,7 @@ services:
         - "8025:8025"
 
   pgadmin:
-    container_name: pgadmin-user
+    container_name: pgadmin
     image: dpage/pgadmin4:latest
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}

@@ -44,15 +44,15 @@ import lombok.Builder;
 @Builder
 public class GMailServiceImpl implements MailService{
 
-    private final Gmail service;
+//    private final Gmail service;
     
-    public GMailServiceImpl() throws Exception {
-        NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-        GsonFactory jsonFactory = GsonFactory.getDefaultInstance();
-        service = new Gmail.Builder(httpTransport, jsonFactory, getCredentials(httpTransport, jsonFactory))
-                .setApplicationName("Test Mailer")
-                .build();
-    }
+//    public GMailServiceImpl() throws Exception {
+//        NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+//        GsonFactory jsonFactory = GsonFactory.getDefaultInstance();
+//        service = new Gmail.Builder(httpTransport, jsonFactory, getCredentials(httpTransport, jsonFactory))
+//                .setApplicationName("Test Mailer")
+//                .build();
+//    }
 
     @Override
     public void sendEmail(EventDto eventDto) throws MailException {
@@ -72,18 +72,18 @@ public class GMailServiceImpl implements MailService{
             Message msg = new Message();
             msg.setRaw(encodedEmail);
 
-            try {
-                msg = service.users().messages().send("me", msg).execute();
-                System.out.println("Message id: " + msg.getId());
-                System.out.println(msg.toPrettyString());
-            } catch (GoogleJsonResponseException e) {
-                GoogleJsonError error = e.getDetails();
-                if (error.getCode() == 403) {
-                    System.err.println("Unable to send message: " + e.getDetails());
-                } else {
-                    throw e;
-                }
-            }
+//            try {
+//                msg = service.users().messages().send("me", msg).execute();
+//                System.out.println("Message id: " + msg.getId());
+//                System.out.println(msg.toPrettyString());
+//            } catch (GoogleJsonResponseException e) {
+//                GoogleJsonError error = e.getDetails();
+//                if (error.getCode() == 403) {
+//                    System.err.println("Unable to send message: " + e.getDetails());
+//                } else {
+//                    throw e;
+//                }
+//            }
         } catch (IOException | MessagingException ex) {
             throw new MailServiceException(ex.getMessage());
         }
@@ -91,10 +91,8 @@ public class GMailServiceImpl implements MailService{
     
     private static Credential getCredentials(final NetHttpTransport httpTransport, GsonFactory jsonFactory)
             throws IOException {
-        InputStream in = GMailServiceImpl.class.getResourceAsStream("/<your_client_secret>.json");
+        InputStream in = GMailServiceImpl.class.getResourceAsStream("/client_secret_1042749728847-3crp3uuef1tn3cg2hjhf0g8b0qr4a54e.apps.googleusercontent.com.json");
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(jsonFactory, new InputStreamReader(in));
-//        getResourceAsStream("/<your_client_secret>.json")));
-
         GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
                 httpTransport, jsonFactory, clientSecrets, Set.of(GMAIL_SEND))
                 .setDataStoreFactory(new FileDataStoreFactory(Paths.get("tokens").toFile()))

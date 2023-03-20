@@ -122,7 +122,6 @@ public class UserController2 {
     public ResponseEntity<UserDto> validateToken(@RequestParam String token) {
         log.info("Trying to validate token {}", token);
         UserDto user = authService.validateToken(token);
-        log.info(user.toString());
         return ResponseEntity.ok(user);
     }
 

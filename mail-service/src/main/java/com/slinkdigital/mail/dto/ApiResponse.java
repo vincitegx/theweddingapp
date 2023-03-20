@@ -9,7 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.springframework.http.HttpStatus;
 
 /**
  *
@@ -23,7 +22,6 @@ import org.springframework.http.HttpStatus;
 public class ApiResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
     protected LocalDateTime timeStamp;
-    protected HttpStatus status;
     protected String message;
     protected String path;
     protected List<String> details;      

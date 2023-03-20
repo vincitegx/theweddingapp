@@ -173,7 +173,7 @@
         <module>vendor</module>
         <module>mail-service</module>
         <module>file-service</module>
-        <!--<module>config-service</module>-->
+        <module>config-service</module>
         <module>admin</module>
     </modules>
 </project>

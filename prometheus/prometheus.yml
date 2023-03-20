@@ -3,15 +3,33 @@ global:
   evaluation_interval: 10s
 
 scrape_configs:
-  - job_name: 'user_service'
+  - job_name: 'user-service'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['user-service:8082']
+      - targets: ['localhost:8082']
         labels:
           application: 'User Service Application'
-  - job_name: 'wedding_service'
+  
+  - job_name: 'discovery-service'
+    scrape_interval: 5s
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['wedding-service:8083']
+      - targets: ['localhost:8761']
         labels:
-          application: 'Wedding Service Application'
+          application: 'Discovery Service Application'
+    
+  - job_name: 'api-gateway'
+    scrape_interval: 5s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['localhost:8000'] 
+        labels:
+          application: 'API Gateway Application'
+
+  - job_name: 'mail-service'
+    scrape_interval: 5s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['localhost:9091'] 
+        labels:
+          application: 'Mail Service Application'
