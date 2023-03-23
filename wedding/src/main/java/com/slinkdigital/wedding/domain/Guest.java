@@ -28,9 +28,6 @@ public class Guest implements Serializable {
     @ManyToOne
     private Wedding wedding;
     
-    @Column(unique = true)
-    private String code;
-    
     private String email; 
     
     private String name;
@@ -42,9 +39,6 @@ public class Guest implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private GuestStatus guestStatus;
-    
-    @Lob
-    private String comment;
     
     @Column(nullable = false, updatable = false)
     protected LocalDateTime createdAt;

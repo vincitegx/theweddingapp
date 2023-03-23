@@ -21,17 +21,17 @@ import reactor.kafka.receiver.ReceiverRecord;
 public class KafkaServiceImpl implements KafkaService {
 
 
-    private Flux<ReceiverRecord<String, String>> testTopicStream;
+    private final Flux<ReceiverRecord<String, String>> testTopicStream;
 
 
     KafkaServiceImpl() throws IOException {
 
-        Properties kafkaProperties = PropertiesLoaderUtils.loadAllProperties("ccloud.properties");
+        Properties kafkaProperties = PropertiesLoaderUtils.loadAllProperties("application.properties");
 
         kafkaProperties.put(ConsumerConfig.CLIENT_ID_CONFIG, "reactive-consumer");
         kafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, "feed-group");
         kafkaProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        kafkaProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+//        kafkaProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         kafkaProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         ReceiverOptions<String, String> receiverOptions = ReceiverOptions.create(kafkaProperties);

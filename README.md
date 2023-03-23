@@ -22,10 +22,62 @@ The following requirements are needed to run this project
 - **CI/CD**: Docker, Jenkins, AWS
 - **IDE**: Apache NetBeans 12.4
 
-## Important endpoints
-- http://localhost:8008 - Gateway-Service
-- http://localhost:8761 - Discovery-Service
-- http://localhost:9092 - Broker
-- http://localhost:2181 - Zookeeper
-- http://localhost:3000 - Grafana Dashboard
-- http://localhost:9090 - Prometheus
+Getting Started
+Prerequisites
+You will need the following software installed on your local machine:
+
+Docker
+Docker Compose
+Starting the Services
+To start the microservices, navigate to the project directory and run the following command:
+
+Copy code
+docker-compose up
+This will start the following services:
+
+Discovery Service (Eureka) at http://localhost:8761
+Gateway Service (API Gateway) at http://localhost:8008
+User Service at http://localhost:8082
+Wedding Microservice at http://localhost:8083
+Grafana at http://localhost:3000
+Prometheus at http://localhost:9090
+Jenkins at http://localhost:8080
+PgAdmin at http://localhost:5050
+Mailhog at http://localhost:8025
+You can access each service by navigating to its corresponding URL.
+
+Stopping the Services
+To stop the services, press Ctrl+C in the terminal window where the docker-compose up command was executed.
+
+Configuration
+By default, the following ports are used:
+
+Discovery Service (Eureka) - 8761
+Gateway Service (API Gateway) - 8008
+User Service - 8082
+Wedding Microservice - 8083
+Grafana - 3000
+Prometheus - 9090
+Jenkins - 8080
+PgAdmin - 5050
+Mailhog - 8025
+You can modify the ports used by editing the docker-compose.yml file.
+
+Built With
+Docker
+Postgres
+Java
+Spring Boot
+Eureka
+API Gateway
+User Service
+Wedding Microservice
+Grafana
+Prometheus
+Jenkins
+PgAdmin
+Mailhog
+Authors
+David Tega
+License
+This project is licensed under the MIT License - see the LICENSE.md file for details.

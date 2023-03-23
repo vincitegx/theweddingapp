@@ -3,6 +3,7 @@ package com.slinkdigital.wedding.controller;
 import com.slinkdigital.wedding.dto.ApiResponse;
 import com.slinkdigital.wedding.dto.GuestDto;
 import com.slinkdigital.wedding.dto.GuestSettingDto;
+import com.slinkdigital.wedding.dto.MessageGuestDto;
 import com.slinkdigital.wedding.service.GuestService;
 import com.slinkdigital.wedding.service.GuestSettingService;
 import java.time.LocalDateTime;
@@ -137,16 +138,16 @@ public class GuestController {
         );
     }
     
-//    @PostMapping("guests/invitation")
-//    public ResponseEntity<ApiResponse> sendInvitationToGuests(@Valid @RequestBody List<GuestDto> guestDto){
-//        Map<String, String> messageStatus = guestService.sendInvitationToGuests(guestDto);
-//        return ResponseEntity.ok(
-//                ApiResponse.builder()
-//                        .timeStamp(LocalDateTime.now())
-//                        .data(Map.of("isMessageSent", true))
-//                        .message(messageStatus.get("success"))
-//                        .status(OK)
-//                        .build()
-//        );
-//    }    
+    @PostMapping("guests/invitation")
+    public ResponseEntity<ApiResponse> sendInvitationToGuests(@Valid @RequestBody MessageGuestDto messageGuestDto){
+        Map<String, String> messageStatus = guestService.sendInvitationToGuests(messageGuestDto);
+        return ResponseEntity.ok(
+                ApiResponse.builder()
+                        .timeStamp(LocalDateTime.now())
+                        .data(Map.of("isMessageSent", true))
+                        .message(messageStatus.get("success"))
+                        .status(OK)
+                        .build()
+        );
+    }    
 }

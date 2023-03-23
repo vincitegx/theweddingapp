@@ -6,11 +6,10 @@ import com.slinkdigital.wedding.domain.Post;
 import com.slinkdigital.wedding.domain.Wedding;
 import com.slinkdigital.wedding.dto.PostDto;
 import com.slinkdigital.wedding.exception.WeddingException;
-import com.slinkdigital.wedding.mapper.WeddingMapper;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneOffset;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /**
@@ -18,10 +17,10 @@ import org.springframework.stereotype.Service;
  * @author TEGA
  */
 @Service
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class PostMapper {
 
-    private WeddingMapper weddingMapper;
+    private final WeddingMapper weddingMapper;
 
     public Post mapDtoToPost(PostDto postDto) {
         return Post.builder()

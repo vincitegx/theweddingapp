@@ -84,7 +84,8 @@ public class CoupleService {
         try {
             Wedding wedding = weddingRepository.findById(coupleDto.getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
             Long loggedInUser = getLoggedInUserId();
-            if (!Objects.equals(loggedInUser, wedding.getAuthorId()) || !Objects.equals(loggedInUser, wedding.getSpouseId())) {
+            log.info(loggedInUser+"");
+            if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
                 throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
             } else {
                 String imageUrl = fileService.uploadFile(file);

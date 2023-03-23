@@ -21,15 +21,14 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.cors().and()
-                .authorizeHttpRequests()
-                .requestMatchers("/resources/**", "/webjars/**", "/assests/**").permitAll()
-                .requestMatchers("/v3/api-docs",
+        httpSecurity.cors();
+        httpSecurity.securityMatcher("/api/uu/v1/users/**");
+        httpSecurity.authorizeHttpRequests()
+                .requestMatchers("/v3/api-docs/**","/v2/api-docs/**", "/swagger-ui/**", "/webjars/**", "/assests/**", "/resources/**", "/swagger-ui.html").permitAll()
+                .requestMatchers(
                         "/configuration/ui",
                         "/swagger-resources/**",
                         "/configuration/security",
-                        "/swagger-ui.html",
-                        "/swagger-ui/**",
                         "/actuator/**"
                 ).permitAll()
                 .requestMatchers("/api/uu/v1/users/**").permitAll();

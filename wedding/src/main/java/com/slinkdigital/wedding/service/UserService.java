@@ -20,7 +20,7 @@ public class UserService {
 
     public Boolean addRoleCouple(List<Long> couples) {
         return webClientBuilder.build().post()
-                .uri("http://gateway-service/api/us/v1/users/role-couple",
+                .uri("http://gateway-service/api/us/v1/users/roles/couple",
                         uriBuilder -> uriBuilder.queryParam("couple", couples).build())
                 .header("authorization", request.getHeader(HttpHeaders.AUTHORIZATION))
                 .retrieve()

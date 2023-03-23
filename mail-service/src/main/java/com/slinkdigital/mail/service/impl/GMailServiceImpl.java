@@ -5,35 +5,39 @@ import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInsta
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.slinkdigital.mail.dto.EventDto;
 import com.slinkdigital.mail.service.MailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.MailException;
 import org.springframework.stereotype.Service;
-import com.google.api.client.googleapis.json.GoogleJsonError;
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
-import com.google.api.services.gmail.Gmail;
 import static com.google.api.services.gmail.GmailScopes.GMAIL_SEND;
 import com.google.api.services.gmail.model.Message;
 import org.apache.commons.codec.binary.Base64;
-import javax.mail.Session;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+//import javax.mail.Session;
+//import javax.mail.internet.InternetAddress;
+//import javax.mail.internet.MimeMessage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 import com.slinkdigital.mail.exception.MailServiceException;
+import static jakarta.mail.Message.RecipientType.TO;
+import jakarta.mail.Session;
+import jakarta.mail.internet.AddressException;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Paths;
 import java.util.Set;
-import static javax.mail.Message.RecipientType.TO;
-import javax.mail.MessagingException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+//import static javax.mail.Message.RecipientType.TO;
+//import javax.mail.MessagingException;
 import lombok.Builder;
+import org.springframework.messaging.MessagingException;
 
 /**
  *
@@ -86,6 +90,10 @@ public class GMailServiceImpl implements MailService{
 //            }
         } catch (IOException | MessagingException ex) {
             throw new MailServiceException(ex.getMessage());
+        } catch (AddressException ex) {
+            Logger.getLogger(GMailServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (jakarta.mail.MessagingException ex) {
+            Logger.getLogger(GMailServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     

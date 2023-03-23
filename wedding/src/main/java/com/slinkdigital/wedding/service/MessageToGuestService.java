@@ -135,7 +135,7 @@ public class MessageToGuestService {
     public Map<String, String> sendMessageToGuests(MessageGuestDto messageGuestDto) {
         try {
             Map<String, String> data = new HashMap<>();
-            MessageToGuest messageToGuest = messageToGuestRepository.findById(messageGuestDto.getAuthorId()).orElseThrow(() -> new WeddingException("No such message associated to this Id"));
+            MessageToGuest messageToGuest = messageToGuestRepository.findById(messageGuestDto.getMessage().getId()).orElseThrow(() -> new WeddingException("No such message associated to this Id"));
             Wedding wedding = messageToGuest.getWedding();
             Long loggedInUser = getLoggedInUserId();
             if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
@@ -143,12 +143,12 @@ public class MessageToGuestService {
             } else if (!wedding.isPublished()) {
                 throw new WeddingException("You have to publish this wedding first");
             } else {
-                messageGuestDto.getGuestEmail().forEach(g -> {
-                    data.put("msg", messageGuestDto.getMessage());
-                    data.put("subject", messageGuestDto.getSubject());
-                    EventDto eventDto = EventDto.builder().from(messageGuestDto.getAuthorEmail()).to(g).data(data).build();
-                    kakfaTemplate.send("msg-to-guest", eventDto);
-                });
+//                messageGuestDto.getGuestEmail().forEach(g -> {
+//                    data.put("msg", messageGuestDto.getMessage());
+//                    data.put("subject", messageGuestDto.getSubject());
+//                    EventDto eventDto = EventDto.builder().from(messageGuestDto.getAuthorEmail()).to(g).data(data).build();
+//                    kakfaTemplate.send("msg-to-guest", eventDto);
+//                });
                 data.put("success", "Email sent successfully");
                 return data;
             }

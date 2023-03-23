@@ -45,5 +45,4 @@ public class MailServiceImpl implements MailService {
         }
         emailSender.send(messagePreparator);
     }
-
 }

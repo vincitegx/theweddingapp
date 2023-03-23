@@ -22,13 +22,7 @@ import org.springframework.context.annotation.Scope;
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class MessageGuestDto {
     
-    private Long authorId;
+    private MessageToGuestDto message;
     
-    private String authorEmail;
-    
-    private List<String> guestEmail;
-    
-    private String subject;
-    
-    private String message;
+    private List<GuestDto> guests;
 }

@@ -7,13 +7,13 @@ import com.slinkdigital.wedding.domain.GuestSetting;
 import com.slinkdigital.wedding.domain.Wedding;
 import com.slinkdigital.wedding.dto.EventDto;
 import com.slinkdigital.wedding.dto.GuestDto;
+import com.slinkdigital.wedding.dto.MessageGuestDto;
 import com.slinkdigital.wedding.exception.WeddingException;
 import com.slinkdigital.wedding.mapper.GuestMapper;
 import com.slinkdigital.wedding.mapper.WeddingMapper;
 import com.slinkdigital.wedding.repository.GuestRepository;
 import com.slinkdigital.wedding.repository.GuestSettingRepository;
 import com.slinkdigital.wedding.repository.WeddingRepository;
-import com.slinkdigital.wedding.util.SecureRandomStringGenerator;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,7 +42,6 @@ public class GuestService {
     private final GuestRepository guestRepository;
     private final GuestSettingRepository guestSettingRepository;
     private final WeddingRepository weddingRepository;
-    private final SecureRandomStringGenerator secureRandomStringGenerator;
     private final HttpServletRequest request;
     private final WeddingMapper weddingMapper;
     private final GuestMapper guestMapper;
@@ -75,7 +74,6 @@ public class GuestService {
                 guestDto.setCreatedAt(LocalDateTime.now());
                 guestDto.setAvailabilityStatus(AvailabilityStatus.NO_RESPONSE);
                 guestDto.setGuestStatus(GuestStatus.INVITED);
-                guestDto.setCode(secureRandomStringGenerator.apply(10));
                 Guest guest = guestMapper.mapGuestDtoToGuest(guestDto);
                 guest = guestRepository.save(guest);
                 return guestMapper.mapGuestToGuestDto(guest);
@@ -90,14 +88,13 @@ public class GuestService {
             Integer allowedGuestSize = guestRepository.findByGuestStatus(GuestStatus.ALLOWED).size();
             GuestSetting guestSetting = guestSettingRepository.findByWedding(weddingMapper.mapWeddingDtoToWedding(guestDto.getWedding())).orElseThrow(() -> new WeddingException("Guest Form Is Not Enabled"));
             if (!guestSetting.isGuestFormOpened()) {
-                throw new WeddingException("Guest Form Has Been Closed");
+                throw new WeddingException("Guest Form Is Closed");
             } else if (guestSetting.getMaxNumberOfUnknownGuests() != null && guestSetting.getMaxNumberOfUnknownGuests() >= allowedGuestSize) {
                 throw new WeddingException("Maximum uninvited guest reached");
             } else {
                 guestDto.setCreatedAt(LocalDateTime.now());
                 guestDto.setGuestStatus(GuestStatus.ALLOWED);
                 guestDto.setAvailabilityStatus(AvailabilityStatus.COMING);
-                guestDto.setCode(secureRandomStringGenerator.apply(10));
                 Guest guest = guestMapper.mapGuestDtoToGuest(guestDto);
                 guest = guestRepository.saveAndFlush(guest);
                 log.info(guest.toString());
@@ -188,7 +185,6 @@ public class GuestService {
                 Guest guest = guestRepository.findById(guestDto.getId()).orElseThrow(() -> new WeddingException("No Such Guest !!!"));
                 Map<String, String> data = new HashMap<>();
                 data.put("weddingcode", guest.getWedding().getCode());
-                data.put("guestcode", guest.getCode());
                 EventDto eventDto = EventDto.builder().from(getLoggedInUserEmail()).to(guest.getEmail()).data(data).build();
                 kakfaTemplate.send("email-to-guest", eventDto);
                 result.put("success", "Email sent successfully");
@@ -199,9 +195,9 @@ public class GuestService {
         }
     }
 
-    public Map<String, String> sendInvitationToGuests(List<GuestDto> guestDto) {
+    public Map<String, String> sendInvitationToGuests(MessageGuestDto messageGuestDto) {
         try {
-            Wedding wedding = weddingRepository.findById(guestDto.get(0).getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
+            Wedding wedding = weddingRepository.findById(messageGuestDto.getMessage().getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
             Long loggedInUser = getLoggedInUserId();
             if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
                 throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
@@ -209,11 +205,10 @@ public class GuestService {
                 throw new WeddingException("You have to publish this wedding first");
             } else {
                 Map<String, String> result = new HashMap<>();
-                guestDto.forEach(g -> {
+                messageGuestDto.getGuests().forEach(g -> {
                     Guest guest = guestRepository.findById(g.getId()).orElseThrow(() -> new WeddingException("No Such Guest !!!"));
                     Map<String, String> data = new HashMap<>();
                     data.put("weddingcode", g.getWedding().getCode());
-                    data.put("guestcode", guest.getCode());
                     EventDto eventDto = EventDto.builder().from(getLoggedInUserEmail()).to(guest.getEmail()).data(data).build();
                     kakfaTemplate.send("guest-invitation", eventDto);
                 });
@@ -227,11 +222,11 @@ public class GuestService {
 
     public GuestDto submitInvitationResponse(GuestDto guestDto) {
         try {
-            Guest guest = guestRepository.findByCodeAndWedding(guestDto.getCode(), weddingMapper.mapWeddingDtoToWedding(guestDto.getWedding())).orElseThrow(() -> new WeddingException("No Guest Associated with such code"));
-            guest.setAvailabilityStatus(guestDto.getAvailabilityStatus());
-            guest.setComment(guestDto.getComment());
-            guest = guestRepository.saveAndFlush(guest);
-            return guestMapper.mapGuestToGuestDto(guest);
+//            Guest guest = guestRepository.findByCodeAndWedding(guestDto.getCode(), weddingMapper.mapWeddingDtoToWedding(guestDto.getWedding())).orElseThrow(() -> new WeddingException("No Guest Associated with such code"));
+//            guest.setAvailabilityStatus(guestDto.getAvailabilityStatus());
+//            guest = guestRepository.saveAndFlush(guest);
+//            return guestMapper.mapGuestToGuestDto(guest);
+            return null;
         } catch (WeddingException ex) {
             throw new WeddingException(ex.getMessage());
         }

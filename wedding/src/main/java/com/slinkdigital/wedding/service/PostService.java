@@ -6,6 +6,7 @@ import com.slinkdigital.wedding.domain.Wedding;
 import com.slinkdigital.wedding.dto.PostDto;
 import com.slinkdigital.wedding.exception.WeddingException;
 import com.slinkdigital.wedding.mapper.PostMapper;
+import com.slinkdigital.wedding.mapper.WeddingMapper;
 import com.slinkdigital.wedding.repository.PostRepository;
 import com.slinkdigital.wedding.repository.WeddingRepository;
 import java.time.Instant;
@@ -33,6 +34,7 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final PostMapper postMapper;
+    private final WeddingMapper weddingMapper;
     private final HttpServletRequest request;
     private final WeddingRepository weddingRepository;
     private final FileService fileService;
@@ -88,20 +90,22 @@ public class PostService {
 
     public PostDto convertWeddingToPost(Wedding wedding) throws JsonProcessingException {
         try {
-            wedding = weddingRepository.findById(wedding.getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
+//            wedding = weddingRepository.findById(wedding.getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
             Long loggedInUser = getLoggedInUserId();
             if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
                 throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
             } else if (!wedding.isPublished()) {
                 throw new WeddingException("You have to publish this wedding first");
             } else {
-                PostDto postDto = PostDto.builder().build();
+                PostDto postDto = new PostDto();
                 postDto.setCreatedAt(Instant.now());
                 String fileUrl = "default-wedding.jpg";
                 if (wedding.getCoverFileUrl() != null) {
                     fileUrl = wedding.getCoverFileUrl();
                 }
                 postDto.setFileUrl(fileUrl);
+                postDto.setCaption(wedding.getTitle());
+                postDto.setWedding(weddingMapper.mapWeddingToDto(wedding));
                 Post post = postMapper.mapDtoToPost(postDto);
                 post = postRepository.save(post);
                 // Send asynchronous notification with the PostDto details to the Feed microservice using Kafka

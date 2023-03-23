@@ -6,7 +6,9 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +21,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.cloud.gateway.route.RouteDefinitionLocator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,15 +34,27 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 @Slf4j
 public class SwaggerConfig {
-
+    
     private static final String API_URI = "/v3/api-docs";
-
+    
     private final RouteDefinitionLocator locator;
-
+    
     public SwaggerConfig(RouteDefinitionLocator locator) {
         this.locator = locator;
     }
-
+    
+//    @Bean
+//    public List<GroupedOpenApi> apis() {
+//        List<GroupedOpenApi> groups = new ArrayList<>();
+//        List<RouteDefinition> definitions = locator.getRouteDefinitions().collectList().block();
+//        definitions.stream().filter(routeDefinition -> routeDefinition.getId().matches(".*-service")).forEach(routeDefinition -> {
+//            String name = routeDefinition.getId().replaceAll("-service", "");
+//            log.info(name);
+//            GroupedOpenApi.builder().pathsToMatch("/" + name + "/**").group("group").build();
+//        });
+//        return groups;
+//    }
+    
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(
@@ -68,7 +83,7 @@ public class SwaggerConfig {
             throw new GatewayException(ex.getMessage());
         }
     }
-
+    
     @Bean
     public OpenAPI api() {
         return new OpenAPI()
@@ -77,15 +92,15 @@ public class SwaggerConfig {
                         .description("Wedding API Documentation")
                         .url("https://github.com/vincitegx/theweddingapp"));
     }
-
+    
     @Bean
     public ModelMapper modelMapper() {
         return new ModelMapper();
     }
-
+    
     @Autowired
     Optional<BuildProperties> build;
-
+    
     private Info getApiInfo() {
         String version;
         if (build.isPresent()) {
@@ -104,7 +119,7 @@ public class SwaggerConfig {
                 .contact(c)
                 .license(new License().name("Apache 2.0").url("http://springdoc.org"));
     }
-
+    
     @Bean
     @LoadBalanced
     public WebClient.Builder webClientBuilder() {

@@ -26,15 +26,11 @@ public class GuestDto {
     
     private Long id;
     
-    private String code;
-    
     private String email; 
     
     private String name;
     
     private WeddingDto wedding;
-    
-    private String comment;
     
     private GuestStatus guestStatus;
     

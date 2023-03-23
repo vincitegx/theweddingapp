@@ -2,6 +2,7 @@ package com.slinkdigital.feed.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,9 +24,11 @@ public class PostDto {
     
     private Long id;
     
+    private String caption;
+
     private String fileUrl;
     
-    private String caption;
+    private Instant createdAt;
     
-    private String type;
+    private String duration;
 }

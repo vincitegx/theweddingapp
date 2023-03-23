@@ -220,9 +220,10 @@ public class WeddingService {
             Long loggedInUser = getLoggedInUserId();
             if (wedding.getAuthorId() == null ? loggedInUser != null : !wedding.getAuthorId().equals(loggedInUser)) {
                 throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
-            } else if (wedding.isPublished()) {
-                throw new WeddingException("This wedding has already been published!!!");
-            } else if (!(CoupleStatus.ACCEPTED.name().equalsIgnoreCase(wedding.getCoupleStatus().toString()))) {
+//            } else if (wedding.isPublished()) {
+//                throw new WeddingException("This wedding has already been published!!!");
+            } 
+            else if (!(CoupleStatus.ACCEPTED.name().equalsIgnoreCase(wedding.getCoupleStatus().toString()))) {
                 throw new WeddingException("Cannot publish wedding as spouse has not been added!!!");
             } else {
                 String weddingCode = secureRandomStringGenerator.apply(10);
