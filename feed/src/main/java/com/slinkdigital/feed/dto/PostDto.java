@@ -28,7 +28,11 @@ public class PostDto {
 
     private String fileUrl;
     
-    private Instant createdAt;
-    
     private String duration;
+    
+    private Author author;
+    
+    private Integer totalReactions;
+    
+    private Integer totalComments;
 }

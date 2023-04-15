@@ -57,7 +57,7 @@ services:
     restart: unless-stopped
 
   mailhog:
-      image: davidtega/mailhog
+      image: mailhog/mailhog
       container_name: 'mailhog'
       ports:
         - "1025:1025"
@@ -76,6 +76,66 @@ services:
       - postgres-user
       - postgres-wedding
     restart: unless-stopped
+
+  ## Eureka Server
+  discovery-service:
+    image: davidtega/discovery-service:latest
+    container_name: discovery-service
+    ports:
+      - "8761:8761"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    depends_on:
+      - zipkin
+
+  mailhog:
+      image: mailhog/mailhog
+      container_name: 'mailhog'
+      ports:
+        - "1025:1025"
+        - "8025:8025"
+
+  ## User-Service Docker Compose Config
+  user-service:
+    container_name: user-service
+    image: davidtega/weddingapp-user:latest
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/weddingappusers
+    volumes:
+      - ./config/role-data.sql:/docker-entrypoint-initdb.d/role-data.sql:ro
+    depends_on:
+      - postgres
+      - discovery-service
+    restart: unless-stopped
+
+  api-gateway:
+    image: davidtega/weddingapp-gateway:latest
+    container_name: api-gateway
+    ports:
+      - "8008:8008"
+    expose:
+      - "8008"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY= TRACE
+    depends_on:
+      - discovery-service
+
+  mail-service:
+    image: davidtega/weddingapp-mail:latest
+    container_name: mail-service
+    ports:
+      - "9091:9091"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    depends_on:
+      - zookeeper
+      - broker
+      - discovery-service
+      - mailhog
 
   prometheus:
     image: prom/prometheus:v2.37.1

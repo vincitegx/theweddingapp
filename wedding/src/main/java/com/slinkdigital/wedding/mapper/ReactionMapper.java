@@ -3,7 +3,6 @@ package com.slinkdigital.wedding.mapper;
 import com.github.marlonlom.utilities.timeago.TimeAgo;
 import com.slinkdigital.wedding.domain.Reaction;
 import com.slinkdigital.wedding.dto.ReactionDto;
-import com.slinkdigital.wedding.mapper.WeddingMapper;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -1,7 +1,7 @@
 package com.slinkdigital.wedding.mapper;
 
-import com.slinkdigital.wedding.domain.MessageToGuest;
-import com.slinkdigital.wedding.dto.MessageToGuestDto;
+import com.slinkdigital.wedding.domain.Message;
+import com.slinkdigital.wedding.dto.GuestMessageDto;
 import com.slinkdigital.wedding.mapper.WeddingMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,8 +16,8 @@ public class MsgToGuestMapper {
 
     private final WeddingMapper weddingMapper;
 
-    public MessageToGuest mapDtoToMessageToGuest(MessageToGuestDto messageToGuestDto) {
-        return MessageToGuest.builder()
+    public Message mapDtoToMessageToGuest(GuestMessageDto messageToGuestDto) {
+        return Message.builder()
                 .id(messageToGuestDto.getId())
                 .wedding(weddingMapper.mapWeddingDtoToWedding(messageToGuestDto.getWedding()))
                 .title(messageToGuestDto.getTitle())
@@ -26,8 +26,8 @@ public class MsgToGuestMapper {
                 .build();
     }
 
-    public MessageToGuestDto mapMessageToGuestToDto(MessageToGuest messageToGuest) {
-        return MessageToGuestDto.builder()
+    public GuestMessageDto mapMessageToGuestToDto(Message messageToGuest) {
+        return GuestMessageDto.builder()
                 .id(messageToGuest.getId())
                 .wedding(weddingMapper.mapWeddingToDto(messageToGuest.getWedding()))
                 .title(messageToGuest.getTitle())

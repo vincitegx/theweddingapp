@@ -25,29 +25,19 @@ public class TableOfContentService {
     private final TocMapper tocMapper;
 
     public List<TableOfContentDto> getTableOfContentForWedding(Long id) {
-        try {
-            Wedding wedding = weddingRepository.findById(id).orElseThrow(() -> new WeddingException("No Such Wedding"));
-            List<TableOfContent> tableOfContent = tableOfContentRepository.findByWeddingOrderByNumAsc(wedding);
-            List<TableOfContentDto> toc = tableOfContent.stream().map(t -> tocMapper.mapTableToDto(t)).collect(Collectors.toList());
-            return toc;
-        } catch (WeddingException ex) {
-            throw new WeddingException(ex.getMessage());
-        }
+        Wedding wedding = weddingRepository.findById(id).orElseThrow(() -> new WeddingException("No Such Wedding"));
+        List<TableOfContent> tableOfContent = tableOfContentRepository.findByWeddingOrderByNumAsc(wedding);
+        List<TableOfContentDto> toc = tableOfContent.stream().map(t -> tocMapper.mapTableToDto(t)).collect(Collectors.toList());
+        return toc;
     }
 
-    public List<TableOfContentDto> addTableOfContentElements(TableOfContentDto tableOfContentDto) {
-        try {
-            TableOfContent tableOfContent = tocMapper.mapTableDtoToTable(tableOfContentDto);
-            tableOfContent = tableOfContentRepository.save(tableOfContent);
-            List<TableOfContent> tableOfContentList = tableOfContentRepository.findByWeddingOrderByNumAsc(tableOfContent.getWedding());
-            List<TableOfContentDto> toc = tableOfContentList.stream().map(t -> tocMapper.mapTableToDto(t)).collect(Collectors.toList());
-            return toc;
-        } catch (WeddingException ex) {
-            throw new WeddingException(ex.getMessage());
-        }
+    public TableOfContentDto addTableOfContentElements(TableOfContentDto tableOfContentDto) {
+        TableOfContent tableOfContent = tocMapper.mapTableDtoToTable(tableOfContentDto);
+        tableOfContent = tableOfContentRepository.save(tableOfContent);
+        return tocMapper.mapTableToDto(tableOfContent);
     }
 
-    public List<TableOfContentDto> updateTableOfContentElements(TableOfContentDto tableOfContentDto) {
+    public TableOfContentDto updateTableOfContentElements(TableOfContentDto tableOfContentDto) {
         try {
             TableOfContent tableOfContent = tableOfContentRepository.findById(tableOfContentDto.getId()).orElseThrow(() -> new WeddingException("No Table Of Content Element Found With This Id"));
             tableOfContent.setEndTime(tableOfContentDto.getEndTime());
@@ -56,23 +46,14 @@ public class TableOfContentService {
             tableOfContent.setTitle(tableOfContentDto.getTitle());
             tableOfContent.setPersonInCharge(tableOfContentDto.getPersonInCharge());
             tableOfContent = tableOfContentRepository.saveAndFlush(tableOfContent);
-            List<TableOfContent> tableOfContentList = tableOfContentRepository.findByWeddingOrderByNumAsc(tableOfContent.getWedding());
-            List<TableOfContentDto> toc = tableOfContentList.stream().map(t -> tocMapper.mapTableToDto(t)).collect(Collectors.toList());
-            return toc;
+            return tocMapper.mapTableToDto(tableOfContent);
         } catch (WeddingException ex) {
             throw new WeddingException(ex.getMessage());
         }
     }
 
-    public List<TableOfContentDto> removeTableOfContentElement(Long id) {
-        try {
-            TableOfContent tableOfContent = tableOfContentRepository.findById(id).orElseThrow(() -> new WeddingException("No Table Of Content Element Associated with this wedding"));
-            tableOfContentRepository.delete(tableOfContent);
-            List<TableOfContent> tableOfContentList = tableOfContentRepository.findByWeddingOrderByNumAsc(tableOfContent.getWedding());
-            List<TableOfContentDto> toc = tableOfContentList.stream().map(t -> tocMapper.mapTableToDto(t)).collect(Collectors.toList());
-            return toc;
-        } catch (WeddingException ex) {
-            throw new WeddingException(ex.getMessage());
-        }
+    public void removeTableOfContentElement(Long id) {
+        TableOfContent tableOfContent = tableOfContentRepository.findById(id).orElseThrow(() -> new WeddingException("No Table Of Content Element Associated with this wedding"));
+        tableOfContentRepository.delete(tableOfContent);
     }
 }

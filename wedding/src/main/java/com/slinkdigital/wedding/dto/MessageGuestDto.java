@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Scope;
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class MessageGuestDto {
     
-    private MessageToGuestDto message;
+    private GuestMessageDto message;
     
     private List<GuestDto> guests;
 }

@@ -70,5 +70,5 @@ public class Wedding implements Serializable {
     private Date publishDate;
     
     @Column(nullable = false)
-    private boolean isPublished;
+    private Boolean isPublished;
 }

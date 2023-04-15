@@ -2,6 +2,7 @@ package com.slinkdigital.user.repository;
 
 import com.slinkdigital.user.domain.EmailVerificationToken;
 import com.slinkdigital.user.domain.Users;
+import com.slinkdigital.user.domain.security.Role;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Optional;
@@ -10,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.Assert.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -28,41 +28,39 @@ public class EmailVerificationTokenRepositoryTest {
     private EmailVerificationTokenRepository underTest;
 
     @Autowired
+    private RoleRepository roleRepository;
+    
+    @Autowired
     private UserRepository userRepository;
+    
+    private final String TOKEN = "1234";
 
     /**
      * Test of findByToken method, of class EmailVerificationTokenRepository.
      */
     @BeforeEach
-    @Disabled
     public void setUp() {
-        Set role = new HashSet<>();
-        role.add("ROLE_USER");
-//        Users expected = Users.builder()
-//                .email("david@gmail.com")
-//                .password("1234")
-//                .enabled(true)
-//                .locked(true)
-//                .roles(role)
-//                .createdAt(LocalDateTime.now())
-//                .build();               
-//        expected = userRepository.save(expected);
-//        EmailVerificationToken evt = new EmailVerificationToken("token", expected, LocalDateTime.now().plusDays(1));
-//        underTest.save(evt);
+        Role role = new Role("ROLE_USER");
+        role = roleRepository.save(role);
+        Set<Role> roles = new HashSet<>();
+        roles.add(role);
+        Users user = new Users(null, "david@gmail.com", "1234",LocalDateTime.now(), true, true, roles);                 
+        user = userRepository.save(user);
+        EmailVerificationToken evt = new EmailVerificationToken(TOKEN, user, LocalDateTime.now().plusDays(1));
+        underTest.save(evt);
     }
 
     @AfterEach
-    @Disabled
     public void tearDown() {
         underTest.deleteAll();
+        userRepository.deleteAll();
+        roleRepository.deleteAll();
     }
 
     @Test
-    @Disabled
     @DisplayName("Test to find Email Verification Object By Token")
     public void testFindByToken() {
-        String token = "token";
-        Optional<EmailVerificationToken> result = underTest.findByToken(token);
+        Optional<EmailVerificationToken> result = underTest.findByToken(TOKEN);
         assertTrue(result.isPresent());
     }
 
@@ -70,7 +68,6 @@ public class EmailVerificationTokenRepositoryTest {
      * Test of findByUser method, of class EmailVerificationTokenRepository.
      */
     @Test
-    @Disabled
     @DisplayName("Test to find Email Verification Object By User")
     public void testFindByUser() {
         //Given

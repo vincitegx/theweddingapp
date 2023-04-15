@@ -40,6 +40,10 @@ public class ReactiveWebSocketHandler implements WebSocketHandler {
                 })
                 .map(webSocketSession::textMessage))
                 .and(webSocketSession.receive()
-                        .map(WebSocketMessage::getPayloadAsText).log());
+                        .map(WebSocketMessage::getPayloadAsText).log())
+                .onErrorResume(error -> {
+                    log.error("Error in Kafka subscription: " + error.getMessage(), error);
+                    return Mono.empty();
+                });
     }
 }

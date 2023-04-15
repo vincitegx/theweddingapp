@@ -13,12 +13,14 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
  * @author TEGA
  */
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class BudgetService {
 
@@ -28,23 +30,20 @@ public class BudgetService {
     private final HttpServletRequest request;
 
     public List<BudgetDto> getWeddingBudgets(Long weddingId) {
-        try {
-            Wedding wedding = weddingRepository.findById(weddingId).orElseThrow(() -> new WeddingException("No Such Wedding"));
-            Long loggedInUser = getLoggedInUserId();
-            if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
-                throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
-            } else if (!wedding.isPublished()) {
-                throw new WeddingException("You have to publish this wedding first");
-            } else {
-                List<Budget> budgetList = budgetRepository.findByWedding(wedding);
-                List<BudgetDto> budget = new ArrayList<>();
-                budgetList.forEach(b -> {
-                    budget.add(budgetMapper.mapBudgetToDto(b));
-                });
-                return budget;
-            }
-        } catch (WeddingException ex) {
-            throw new WeddingException(ex.getMessage());
+
+        Wedding wedding = weddingRepository.findById(weddingId).orElseThrow(() -> new WeddingException("No Such Wedding"));
+        Long loggedInUser = getLoggedInUserId();
+        if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
+            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+        } else if (!wedding.getIsPublished()) {
+            throw new WeddingException("You have to publish this wedding first");
+        } else {
+            List<Budget> budgetList = budgetRepository.findByWedding(wedding);
+            List<BudgetDto> budget = new ArrayList<>();
+            budgetList.forEach(b -> {
+                budget.add(budgetMapper.mapBudgetToDto(b));
+            });
+            return budget;
         }
     }
 
@@ -54,7 +53,7 @@ public class BudgetService {
             Long loggedInUser = getLoggedInUserId();
             if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
                 throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
-            } else if (!wedding.isPublished()) {
+            } else if (!wedding.getIsPublished()) {
                 throw new WeddingException("You have to publish this wedding first");
             } else {
                 budgetDto.setCreatedAt(LocalDateTime.now());
@@ -73,7 +72,7 @@ public class BudgetService {
             Long loggedInUser = getLoggedInUserId();
             if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
                 throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
-            } else if (!wedding.isPublished()) {
+            } else if (!wedding.getIsPublished()) {
                 throw new WeddingException("You have to publish this wedding first");
             } else {
                 Budget budget = budgetRepository.findById(budgetDto.getId()).orElseThrow(() -> new WeddingException("No budget associated to this id"));
@@ -87,23 +86,16 @@ public class BudgetService {
         }
     }
 
-    public List<BudgetDto> deleteBudget(Long id) {
+    public void deleteBudget(Long id) {
         try {
             Budget budget = budgetRepository.findById(id).orElseThrow(() -> new WeddingException("No budget associated to this id"));
-            Wedding wedding = weddingRepository.findById(budget.getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
             Long loggedInUser = getLoggedInUserId();
-            if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
+            if (loggedInUser == null || (!loggedInUser.equals(budget.getWedding().getAuthorId()) && !loggedInUser.equals(budget.getWedding().getSpouseId()))) {
                 throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
-            } else if (!wedding.isPublished()) {
+            } else if (!budget.getWedding().getIsPublished()) {
                 throw new WeddingException("You have to publish this wedding first");
             } else {
                 budgetRepository.delete(budget);
-                List<Budget> budgetList = budgetRepository.findByWedding(wedding);
-                List<BudgetDto> bg = new ArrayList<>();
-                budgetList.forEach(b -> {
-                    bg.add(budgetMapper.mapBudgetToDto(b));
-                });
-                return bg;
             }
         } catch (WeddingException ex) {
             throw new WeddingException(ex.getMessage());

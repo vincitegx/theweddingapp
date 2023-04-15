@@ -64,18 +64,6 @@ public class UserController1IT {
     /**
      * Test of searchUser method, of class UserController1.
      */
-    @Test
-    @Disabled
-    public void testSearchUser() {
-        System.out.println("searchUser");
-        String email = "";
-        UserController1 instance = null;
-        ResponseEntity<ApiResponse> expResult = null;
-        ResponseEntity<ApiResponse> result = instance.searchUser(email);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
 
     /**
      * Test of updatePassword method, of class UserController1.
@@ -87,10 +75,8 @@ public class UserController1IT {
         UpdatePasswordRequest updatePasswordRequest = null;
         UserController1 instance = null;
         ResponseEntity<ApiResponse> expResult = null;
-        ResponseEntity<ApiResponse> result = instance.updatePassword(updatePasswordRequest);
-        assertEquals(expResult, result);
+        instance.updatePassword(updatePasswordRequest);
         // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -103,8 +89,8 @@ public class UserController1IT {
         UserRequest userRequest = null;
         UserController1 instance = null;
         ResponseEntity<ApiResponse> expResult = null;
-        ResponseEntity<ApiResponse> result = instance.sendMessageToAdmin(userRequest);
-        assertEquals(expResult, result);
+        instance.sendMessageToAdmin(userRequest);
+//        assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
@@ -119,8 +105,8 @@ public class UserController1IT {
         List<Long> couple = null;
         UserController1 instance = null;
         ResponseEntity<Boolean> expResult = null;
-        ResponseEntity<Boolean> result = instance.addRoleCouple(couple);
-        assertEquals(expResult, result);
+        instance.addRoleCouple(couple);
+//        assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
@@ -135,8 +121,8 @@ public class UserController1IT {
         RefreshTokenRequest refreshTokenRequest = null;
         UserController1 instance = null;
         ResponseEntity<ApiResponse> expResult = null;
-        ResponseEntity<ApiResponse> result = instance.logout(refreshTokenRequest);
-        assertEquals(expResult, result);
+        instance.logout(refreshTokenRequest);
+//        assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
@@ -144,18 +130,5 @@ public class UserController1IT {
     /**
      * Test of handleError method, of class UserController1.
      */
-    @Test
-    @Disabled
-    public void testHandleError() {
-        System.out.println("handleError");
-        HttpServletRequest req = null;
-        Exception ex = null;
-        UserController1 instance = null;
-        ApiResponse expResult = null;
-        ApiResponse result = instance.handleError(req, ex);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
     
 }

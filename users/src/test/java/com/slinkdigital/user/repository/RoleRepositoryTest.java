@@ -5,8 +5,7 @@ import org.junit.jupiter.api.AfterEach;
 import com.slinkdigital.user.domain.security.Role;
 import java.util.ArrayList;
 import java.util.List;
-import static org.junit.Assert.*;
-import org.junit.jupiter.api.Disabled;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -16,7 +15,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
  * @author TEGA
  */
 @DataJpaTest
-@Disabled
 public class RoleRepositoryTest {
     
     @Autowired
@@ -52,6 +50,6 @@ public class RoleRepositoryTest {
         Role result = underTest.findByName(roleName);
         
         //then
-        assertNotNull(result);        
+        Assertions.assertThat(result).extracting("name").isEqualTo(roleName);
     }  
 }

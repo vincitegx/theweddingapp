@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Scope;
 @Builder
 @JsonInclude(NON_NULL)
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class Author<E> {
+public class Author {
     
     private Long id;
     private String name;

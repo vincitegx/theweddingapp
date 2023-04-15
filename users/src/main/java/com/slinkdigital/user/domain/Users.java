@@ -22,15 +22,6 @@ import lombok.NoArgsConstructor;
 		@UniqueConstraint(columnNames = "email", name="uniqueEmailContraint")
 })
 public class Users implements Serializable {
-    
-//    public Users(Long id){
-//        this.id = id;
-//    }
-//    
-//    public Users(String email, String password){
-//        this.email = email;
-//        this.password = password;
-//    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

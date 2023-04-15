@@ -3,7 +3,6 @@ package com.slinkdigital.user.service;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.slinkdigital.user.exception.UserException;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.ExecutionException;
@@ -31,21 +30,13 @@ public class LoginAttemptService {
         loginAttemptCache.invalidate(username);
     }
 
-    public void addUserToLoginAttemptCache(String username) {
+    public void addUserToLoginAttemptCache(String username) throws ExecutionException {
         int attempts = 0;
-        try {
-            attempts = ATTEMPT_INCREMENT + loginAttemptCache.get(username);
-        } catch (ExecutionException ex) {
-            throw new UserException(ex.getMessage());
-        }
+        attempts = ATTEMPT_INCREMENT + loginAttemptCache.get(username);
         loginAttemptCache.put(username, attempts);
     }
 
-    public boolean hasExceededMaxAttempts(String username) {
-        try {
-            return loginAttemptCache.get(username) >= MAXIMUM_NUMBER_OF_ATTEMPTS;
-        } catch (ExecutionException ex) {
-            throw new UserException(ex.getMessage());
-        }
+    public boolean hasExceededMaxAttempts(String username) throws ExecutionException {
+        return loginAttemptCache.get(username) >= MAXIMUM_NUMBER_OF_ATTEMPTS;
     }
 }

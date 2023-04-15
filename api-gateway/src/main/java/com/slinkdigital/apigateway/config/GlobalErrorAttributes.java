@@ -18,7 +18,7 @@ public class GlobalErrorAttributes extends DefaultErrorAttributes {
     public Map<String, Object> getErrorAttributes(ServerRequest request, ErrorAttributeOptions options) {
         Throwable error = this.getError(request);
         log.error("Error occured", error);
-        Map<String, Object> map = super.getErrorAttributes(request, options); 
+        Map<String, Object> map = super.getErrorAttributes(request, options);
         map.put("errorDescription", error.getLocalizedMessage());
         map.put("title", "A error has occured");
         map.put("tabTitle", "Error");

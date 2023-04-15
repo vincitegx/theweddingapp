@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.marlonlom.utilities.timeago.TimeAgo;
 import com.slinkdigital.wedding.domain.Post;
 import com.slinkdigital.wedding.domain.Wedding;
+import com.slinkdigital.wedding.dto.Author;
 import com.slinkdigital.wedding.dto.PostDto;
 import com.slinkdigital.wedding.exception.WeddingException;
 import java.io.IOException;
@@ -28,7 +29,6 @@ public class PostMapper {
                 .fileUrl(postDto.getFileUrl())
                 .id(postDto.getId())
                 .wedding(weddingMapper.mapWeddingDtoToWedding(postDto.getWedding()))
-                .createdAt(postDto.getCreatedAt())
                 .build();
     }
 
@@ -38,8 +38,8 @@ public class PostMapper {
                 .fileUrl(post.getFileUrl())
                 .id(post.getId())
                 .wedding(weddingMapper.mapWeddingToDto(post.getWedding()))
-                .createdAt(post.getCreatedAt())
                 .duration(getDuration(post.getCreatedAt()))
+                .author(new Author(post.getWedding().getId(),post.getWedding().getTitle(),post.getWedding().getCoverFileUrl()))
                 .build();
     }
 
@@ -52,8 +52,8 @@ public class PostMapper {
                 .caption(wedding.getTitle())
                 .fileUrl(wedding.getCoverFileUrl())
                 .wedding(weddingMapper.mapWeddingToDto(wedding))
-                .createdAt(wedding.getCreatedAt().toInstant(ZoneOffset.UTC))
                 .duration(getDuration(wedding.getCreatedAt().toInstant(ZoneOffset.UTC)))
+                .author(new Author(wedding.getId(),wedding.getTitle(),wedding.getCoverFileUrl()))
                 .build();
     }
 

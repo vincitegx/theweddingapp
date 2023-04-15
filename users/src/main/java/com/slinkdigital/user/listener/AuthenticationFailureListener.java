@@ -1,6 +1,7 @@
 package com.slinkdigital.user.listener;
 
 import com.slinkdigital.user.service.LoginAttemptService;
+import java.util.concurrent.ExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.authentication.event.AuthenticationFailureBadCredentialsEvent;
@@ -16,7 +17,7 @@ public class AuthenticationFailureListener {
     }
 
     @EventListener
-    public void onAuthenticationFailure(AuthenticationFailureBadCredentialsEvent event) {
+    public void onAuthenticationFailure(AuthenticationFailureBadCredentialsEvent event) throws ExecutionException {
         Object principal = event.getAuthentication().getPrincipal();
         if(principal instanceof String) {
             String username = (String) event.getAuthentication().getPrincipal();

@@ -43,54 +43,31 @@ public class ReactionService {
         }
     }
 
-    public List<ReactionDto> addReaction(ReactionDto reactionDto) {
-        try {
-            Reaction reaction = Reaction.builder()
-                    .userId(reactionDto.getUserId())
-                    .type(reactionDto.getType())
-                    .createdAt(Instant.now())
-                    .wedding(weddingMapper.mapWeddingDtoToWedding(reactionDto.getWedding()))
-                    .build();
-            reactionRepository.save(reaction);
-            List<Reaction> reactions = reactionRepository.findByWedding(reaction.getWedding());
-            List<ReactionDto> reactionDtos = new ArrayList<>();
-            reactions.forEach(r -> {
-                reactionDtos.add(reactionMapper.mapReactionToDto(r));
-            });
-            return reactionDtos;
-        } catch (WeddingException ex) {
-            throw new WeddingException(ex.getMessage());
-        }
+    public ReactionDto addReaction(ReactionDto reactionDto) {
+        Reaction reaction = Reaction.builder()
+                .userId(reactionDto.getUserId())
+                .type(reactionDto.getType())
+                .createdAt(Instant.now())
+                .wedding(weddingMapper.mapWeddingDtoToWedding(reactionDto.getWedding()))
+                .build();
+        reaction = reactionRepository.save(reaction);
+        return reactionMapper.mapReactionToDto(reaction);
     }
 
     public List<ReactionDto> updateReaction(ReactionDto reactionDto) {
-        try {
-            Reaction reaction = reactionRepository.findById(reactionDto.getId()).orElseThrow(() -> new WeddingException("No such reaction"));
-            reaction.setType(reactionDto.getType());
-            reactionRepository.saveAndFlush(reaction);
-            List<Reaction> reactions = reactionRepository.findByWedding(reaction.getWedding());
-            List<ReactionDto> reactionDtos = new ArrayList<>();
-            reactions.forEach(r -> {
-                reactionDtos.add(reactionMapper.mapReactionToDto(r));
-            });
-            return reactionDtos;
-        } catch (WeddingException ex) {
-            throw new WeddingException(ex.getMessage());
-        }
+        Reaction reaction = reactionRepository.findById(reactionDto.getId()).orElseThrow(() -> new WeddingException("No such reaction"));
+        reaction.setType(reactionDto.getType());
+        reactionRepository.saveAndFlush(reaction);
+        List<Reaction> reactions = reactionRepository.findByWedding(reaction.getWedding());
+        List<ReactionDto> reactionDtos = new ArrayList<>();
+        reactions.forEach(r -> {
+            reactionDtos.add(reactionMapper.mapReactionToDto(r));
+        });
+        return reactionDtos;
     }
 
-    public List<ReactionDto> removeReaction(Long id) {
-        try {
-            Reaction reaction = reactionRepository.findById(id).orElseThrow(() -> new WeddingException("No such reaction"));
-            reactionRepository.delete(reaction);
-            List<Reaction> reactions = reactionRepository.findByWedding(reaction.getWedding());
-            List<ReactionDto> reactionDtos = new ArrayList<>();
-            reactions.forEach(r -> {
-                reactionDtos.add(reactionMapper.mapReactionToDto(r));
-            });
-            return reactionDtos;
-        } catch (WeddingException ex) {
-            throw new WeddingException(ex.getMessage());
-        }
+    public void removeReaction(Long id) {
+        Reaction reaction = reactionRepository.findById(id).orElseThrow(() -> new WeddingException("No such reaction"));
+        reactionRepository.delete(reaction);
     }
 }

@@ -30,8 +30,11 @@ public class PostDto {
     
     private WeddingDto wedding;
     
-    private Instant createdAt;
-    
     private String duration;
     
+    private Author author;
+    
+    private Integer totalReactions;
+    
+    private Integer totalComments;
 }

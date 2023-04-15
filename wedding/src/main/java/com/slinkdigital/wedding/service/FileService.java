@@ -1,10 +1,11 @@
 package com.slinkdigital.wedding.service;
 
-import com.slinkdigital.wedding.exception.WeddingException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
@@ -27,9 +28,8 @@ public class FileService {
     private final HttpServletRequest request;
     private final WebClient.Builder webClientBuilder;
 
-    public String uploadFile(MultipartFile file) {
-        try {
-            MultipartBodyBuilder builder = new MultipartBodyBuilder();
+    public String uploadFile(MultipartFile file) throws IOException {
+        MultipartBodyBuilder builder = new MultipartBodyBuilder();
             String fileExt = StringUtils.getFilenameExtension(file.getOriginalFilename());
             builder.part("file", new ByteArrayResource(file.getBytes())).filename(file.getName());
             String coverImageUrl = webClientBuilder.build().post()
@@ -48,17 +48,17 @@ public class FileService {
                     .bodyToMono(String.class)
                     .block();
             return coverImageUrl;
-        } catch (IOException ex) {
-            throw new WeddingException(ex.getMessage());
-        }
     }
 
     public List<String> uploadFiles(List<MultipartFile> files) {
         List<String> imageUrls = new ArrayList<>();
         files.forEach(f -> {
-            imageUrls.add(uploadFile(f));
+            try {
+                imageUrls.add(uploadFile(f));
+            } catch (IOException ex) {
+                Logger.getLogger(FileService.class.getName()).log(Level.SEVERE, null, ex);
+            }
         });
         return imageUrls;
     }
-
 }

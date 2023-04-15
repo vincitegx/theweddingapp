@@ -48,203 +48,143 @@ public class GuestService {
     private final KafkaTemplate<String, EventDto> kakfaTemplate;
 
     public Page<GuestDto> getAllGuestsForWedding(Long id, String search, PageRequest pageRequest) {
-        try {
-            Wedding w = weddingRepository.findById(id).orElseThrow(() -> new WeddingException("No such wedding associated to this id"));
-            Page<Guest> guests = guestRepository.findByWeddingAndNameContainsOrEmailContains(w, search, search, pageRequest);
-            List<Guest> guestList = guests.toList();
-            Page<GuestDto> guestDto = new PageImpl(guestList);
-            guests.forEach(g -> {
-                guestDto.and(guestMapper.mapGuestToGuestDto(g));
-            });
-            return guestDto;
-        } catch (WeddingException ex) {
-            throw new WeddingException(ex.getMessage());
-        }
+        Wedding w = weddingRepository.findById(id).orElseThrow(() -> new WeddingException("No such wedding associated to this id"));
+        Page<Guest> guests = guestRepository.findByWeddingAndNameContainsOrEmailContains(w, search, search, pageRequest);
+        List<Guest> guestList = guests.toList();
+        Page<GuestDto> guestDto = new PageImpl(guestList);
+        guests.forEach(g -> {
+            guestDto.and(guestMapper.mapGuestToGuestDto(g));
+        });
+        return guestDto;
     }
 
     public GuestDto addGuest(GuestDto guestDto) {
-        try {
-            Wedding wedding = weddingRepository.findById(guestDto.getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
-            Long loggedInUser = getLoggedInUserId();
-            if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
-                throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
-            } else if (!wedding.isPublished()) {
-                throw new WeddingException("You have to publish this wedding first");
-            } else {
-                guestDto.setCreatedAt(LocalDateTime.now());
-                guestDto.setAvailabilityStatus(AvailabilityStatus.NO_RESPONSE);
-                guestDto.setGuestStatus(GuestStatus.INVITED);
-                Guest guest = guestMapper.mapGuestDtoToGuest(guestDto);
-                guest = guestRepository.save(guest);
-                return guestMapper.mapGuestToGuestDto(guest);
-            }
-        } catch (WeddingException ex) {
-            throw new WeddingException(ex.getMessage());
+        Wedding wedding = weddingRepository.findById(guestDto.getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
+        Long loggedInUser = getLoggedInUserId();
+        if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
+            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+        } else if (!wedding.getIsPublished()) {
+            throw new WeddingException("You have to publish this wedding first");
+        } else {
+            guestDto.setCreatedAt(LocalDateTime.now());
+            guestDto.setAvailabilityStatus(AvailabilityStatus.NO_RESPONSE);
+            guestDto.setGuestStatus(GuestStatus.INVITED);
+            Guest guest = guestMapper.mapGuestDtoToGuest(guestDto);
+            guest = guestRepository.save(guest);
+            return guestMapper.mapGuestToGuestDto(guest);
         }
     }
 
     public GuestDto guestSelfAddition(GuestDto guestDto) {
-        try {
-            Integer allowedGuestSize = guestRepository.findByGuestStatus(GuestStatus.ALLOWED).size();
-            GuestSetting guestSetting = guestSettingRepository.findByWedding(weddingMapper.mapWeddingDtoToWedding(guestDto.getWedding())).orElseThrow(() -> new WeddingException("Guest Form Is Not Enabled"));
-            if (!guestSetting.isGuestFormOpened()) {
-                throw new WeddingException("Guest Form Is Closed");
-            } else if (guestSetting.getMaxNumberOfUnknownGuests() != null && guestSetting.getMaxNumberOfUnknownGuests() >= allowedGuestSize) {
-                throw new WeddingException("Maximum uninvited guest reached");
-            } else {
-                guestDto.setCreatedAt(LocalDateTime.now());
-                guestDto.setGuestStatus(GuestStatus.ALLOWED);
-                guestDto.setAvailabilityStatus(AvailabilityStatus.COMING);
-                Guest guest = guestMapper.mapGuestDtoToGuest(guestDto);
-                guest = guestRepository.saveAndFlush(guest);
-                log.info(guest.toString());
-                return guestMapper.mapGuestToGuestDto(guest);
-            }
-        } catch (WeddingException ex) {
-            throw new WeddingException(ex.getMessage());
+        Integer allowedGuestSize = guestRepository.findByGuestStatus(GuestStatus.ALLOWED).size();
+        GuestSetting guestSetting = guestSettingRepository.findByWedding(weddingMapper.mapWeddingDtoToWedding(guestDto.getWedding())).orElseThrow(() -> new WeddingException("Guest Form Is Not Enabled"));
+        if (!guestSetting.isGuestFormOpened()) {
+            throw new WeddingException("Guest Form Is Closed");
+        } else if (guestSetting.getMaxNumberOfUnknownGuests() != null && guestSetting.getMaxNumberOfUnknownGuests() >= allowedGuestSize) {
+            throw new WeddingException("Maximum uninvited guest reached");
+        } else {
+            guestDto.setCreatedAt(LocalDateTime.now());
+            guestDto.setGuestStatus(GuestStatus.ALLOWED);
+            guestDto.setAvailabilityStatus(AvailabilityStatus.COMING);
+            Guest guest = guestMapper.mapGuestDtoToGuest(guestDto);
+            guest = guestRepository.saveAndFlush(guest);
+            log.info(guest.toString());
+            return guestMapper.mapGuestToGuestDto(guest);
         }
     }
 
     public GuestDto changeGuestStatus(GuestDto guestDto) {
-        try {
-            Wedding wedding = weddingRepository.findById(guestDto.getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
-            Long loggedInUser = getLoggedInUserId();
-            if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
-                throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
-            } else if (!wedding.isPublished()) {
-                throw new WeddingException("You have to publish this wedding first");
-            } else {
-                Guest guest = guestRepository.findById(guestDto.getId()).orElseThrow(() -> new WeddingException("No Such Guest !!!"));
-                guest.setGuestStatus(guestDto.getGuestStatus());
-                guest = guestRepository.save(guest);
-                return guestMapper.mapGuestToGuestDto(guest);
-            }
-        } catch (WeddingException ex) {
-            throw new WeddingException(ex.getMessage());
+        Wedding wedding = weddingRepository.findById(guestDto.getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
+        Long loggedInUser = getLoggedInUserId();
+        if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
+            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+        } else if (!wedding.getIsPublished()) {
+            throw new WeddingException("You have to publish this wedding first");
+        } else {
+            Guest guest = guestRepository.findById(guestDto.getId()).orElseThrow(() -> new WeddingException("No Such Guest !!!"));
+            guest.setGuestStatus(guestDto.getGuestStatus());
+            guest = guestRepository.save(guest);
+            return guestMapper.mapGuestToGuestDto(guest);
         }
     }
 
-    public Page<GuestDto> removeGuest(GuestDto guestDto) {
-        try {
-            Wedding wedding = weddingRepository.findById(guestDto.getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
-            Long loggedInUser = getLoggedInUserId();
-            if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
-                throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
-            } else if (!wedding.isPublished()) {
-                throw new WeddingException("You have to publish this wedding first");
-            } else {
-                Guest guest = guestRepository.findByIdAndWedding(guestDto.getId(), weddingMapper.mapWeddingDtoToWedding(guestDto.getWedding())).orElseThrow(() -> new WeddingException("No Such Guest !!!"));
-                guestRepository.delete(guest);
-                Page<Guest> guests = guestRepository.findByWeddingAndNameContainsOrEmailContains(weddingMapper.mapWeddingDtoToWedding(guestDto.getWedding()), "",
-                        "", PageRequest.of(0, 8, Sort.Direction.ASC, "id"));
-                List<Guest> guestList = guests.toList();
-                Page<GuestDto> guestPage = new PageImpl(guestList);
-                guests.forEach(g -> {
-                    guestPage.and(guestMapper.mapGuestToGuestDto(g));
-                });
-                return guestPage;
-            }
-        } catch (WeddingException ex) {
-            throw new WeddingException(ex.getMessage());
+    public void removeGuest(GuestDto guestDto) {
+        Wedding wedding = weddingRepository.findById(guestDto.getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
+        Long loggedInUser = getLoggedInUserId();
+        if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
+            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+        } else if (!wedding.getIsPublished()) {
+            throw new WeddingException("You have to publish this wedding first");
+        } else {
+            Guest guest = guestRepository.findByIdAndWedding(guestDto.getId(), weddingMapper.mapWeddingDtoToWedding(guestDto.getWedding())).orElseThrow(() -> new WeddingException("No Such Guest !!!"));
+            guestRepository.delete(guest);
         }
     }
 
-    public Page<GuestDto> removeGuests(List<GuestDto> guestDto) {
+    public void removeGuests(List<GuestDto> guestDto) {
         Wedding wedding = weddingRepository.findById(guestDto.get(0).getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
         Long loggedInUser = getLoggedInUserId();
         if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
             throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
-        } else if (!wedding.isPublished()) {
+        } else if (!wedding.getIsPublished()) {
             throw new WeddingException("You have to publish this wedding first");
         } else {
             guestDto.forEach(g -> {
                 Guest guest = guestRepository.findByIdAndWedding(g.getId(), weddingMapper.mapWeddingDtoToWedding(g.getWedding())).orElseThrow(() -> new WeddingException("No Such Guest !!!"));
                 guestRepository.delete(guest);
             });
-            Page<Guest> guests = guestRepository.findByWeddingAndNameContainsOrEmailContains(weddingMapper.mapWeddingDtoToWedding(guestDto.get(0).getWedding()), "",
-                    "", PageRequest.of(0, 8, Sort.Direction.ASC, "id"));
-            List<Guest> guestList = guests.toList();
-            Page<GuestDto> guestPage = new PageImpl(guestList);
-            guests.forEach(g -> {
-                guestPage.and(guestMapper.mapGuestToGuestDto(g));
-            });
-            return guestPage;
         }
     }
 
     public Map<String, String> sendInvitationToGuest(GuestDto guestDto) {
-        try {
-            Wedding wedding = weddingRepository.findById(guestDto.getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
-            Long loggedInUser = getLoggedInUserId();
-            if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
-                throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
-            } else if (!wedding.isPublished()) {
-                throw new WeddingException("You have to publish this wedding first");
-            } else {
-                Map<String, String> result = new HashMap<>();
-                Guest guest = guestRepository.findById(guestDto.getId()).orElseThrow(() -> new WeddingException("No Such Guest !!!"));
-                Map<String, String> data = new HashMap<>();
-                data.put("weddingcode", guest.getWedding().getCode());
-                EventDto eventDto = EventDto.builder().from(getLoggedInUserEmail()).to(guest.getEmail()).data(data).build();
-                kakfaTemplate.send("email-to-guest", eventDto);
-                result.put("success", "Email sent successfully");
-                return result;
-            }
-        } catch (WeddingException ex) {
-            throw new WeddingException(ex.getMessage());
+        Wedding wedding = weddingRepository.findById(guestDto.getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
+        Long loggedInUser = getLoggedInUserId();
+        if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
+            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+        } else if (!wedding.getIsPublished()) {
+            throw new WeddingException("You have to publish this wedding first");
+        } else {
+            Map<String, String> result = new HashMap<>();
+            Guest guest = guestRepository.findById(guestDto.getId()).orElseThrow(() -> new WeddingException("No Such Guest !!!"));
+            Map<String, String> data = new HashMap<>();
+            data.put("weddingcode", guest.getWedding().getCode());
+            EventDto eventDto = EventDto.builder().from(getLoggedInUserEmail()).to(guest.getEmail()).data(data).build();
+            kakfaTemplate.send("email-to-guest", eventDto);
+            result.put("success", "Email sent successfully");
+            return result;
         }
     }
 
     public Map<String, String> sendInvitationToGuests(MessageGuestDto messageGuestDto) {
-        try {
-            Wedding wedding = weddingRepository.findById(messageGuestDto.getMessage().getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
-            Long loggedInUser = getLoggedInUserId();
-            if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
-                throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
-            } else if (!wedding.isPublished()) {
-                throw new WeddingException("You have to publish this wedding first");
-            } else {
-                Map<String, String> result = new HashMap<>();
-                messageGuestDto.getGuests().forEach(g -> {
-                    Guest guest = guestRepository.findById(g.getId()).orElseThrow(() -> new WeddingException("No Such Guest !!!"));
-                    Map<String, String> data = new HashMap<>();
-                    data.put("weddingcode", g.getWedding().getCode());
-                    EventDto eventDto = EventDto.builder().from(getLoggedInUserEmail()).to(guest.getEmail()).data(data).build();
-                    kakfaTemplate.send("guest-invitation", eventDto);
-                });
-                result.put("success", "Email sent successfully");
-                return result;
-            }
-        } catch (WeddingException ex) {
-            throw new WeddingException(ex.getMessage());
+        Wedding wedding = weddingRepository.findById(messageGuestDto.getMessage().getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
+        Long loggedInUser = getLoggedInUserId();
+        if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
+            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+        } else if (!wedding.getIsPublished()) {
+            throw new WeddingException("You have to publish this wedding first");
+        } else {
+            Map<String, String> result = new HashMap<>();
+            messageGuestDto.getGuests().forEach(g -> {
+                Guest guest = guestRepository.findById(g.getId()).orElseThrow(() -> new WeddingException("No Such Guest !!!"));
+                Map<String, String> data = new HashMap<>();
+                data.put("weddingcode", g.getWedding().getCode());
+                EventDto eventDto = EventDto.builder().from(getLoggedInUserEmail()).to(guest.getEmail()).data(data).build();
+                kakfaTemplate.send("guest-invitation", eventDto);
+            });
+            result.put("success", "Email sent successfully");
+            return result;
         }
     }
 
     public GuestDto submitInvitationResponse(GuestDto guestDto) {
-        try {
-//            Guest guest = guestRepository.findByCodeAndWedding(guestDto.getCode(), weddingMapper.mapWeddingDtoToWedding(guestDto.getWedding())).orElseThrow(() -> new WeddingException("No Guest Associated with such code"));
-//            guest.setAvailabilityStatus(guestDto.getAvailabilityStatus());
-//            guest = guestRepository.saveAndFlush(guest);
-//            return guestMapper.mapGuestToGuestDto(guest);
-            return null;
-        } catch (WeddingException ex) {
-            throw new WeddingException(ex.getMessage());
-        }
+        return null;
     }
 
     private Long getLoggedInUserId() {
-        try {
-            return Long.parseLong(request.getHeader("x-id"));
-        } catch (WeddingException ex) {
-            throw new WeddingException("You Need To Be Logged In !!!");
-        }
+        return Long.parseLong(request.getHeader("x-id"));
     }
 
     private String getLoggedInUserEmail() {
-        try {
-            return request.getHeader("x-email");
-        } catch (Exception ex) {
-            throw new WeddingException("You Need To Be Logged In !!!");
-        }
+        return request.getHeader("x-email");
     }
 }

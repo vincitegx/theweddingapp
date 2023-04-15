@@ -1,15 +1,11 @@
 package com.slinkdigital.wedding.controller;
 
-import com.slinkdigital.wedding.dto.ApiResponse;
 import com.slinkdigital.wedding.dto.TableOfContentDto;
 import com.slinkdigital.wedding.service.TableOfContentService;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import static org.springframework.http.HttpStatus.OK;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -31,54 +28,26 @@ public class TocController {
     private final TableOfContentService tableOfContentService;
     
     @PostMapping
-    public ResponseEntity<ApiResponse> addTableOfContentElements(@Valid @RequestBody TableOfContentDto tableOfContentDto){
-        List<TableOfContentDto> tableOfContent = tableOfContentService.addTableOfContentElements(tableOfContentDto);
-        return ResponseEntity.ok(
-                ApiResponse.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .data(Map.of("toc", tableOfContent))
-                        .message("Toc Successful")
-                        .status(OK)
-                        .build()
-        );
+    @ResponseStatus(HttpStatus.CREATED)
+    public TableOfContentDto addTableOfContentElements(@Valid @RequestBody TableOfContentDto tableOfContentDto){
+        return tableOfContentService.addTableOfContentElements(tableOfContentDto);
     }
     
     @PutMapping
-    public ResponseEntity<ApiResponse> updateTableOfContentElement(@Valid @RequestBody TableOfContentDto tableOfContentDto){
-        List<TableOfContentDto> tableOfContent = tableOfContentService.updateTableOfContentElements(tableOfContentDto);
-        return ResponseEntity.ok(
-                ApiResponse.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .data(Map.of("toc", tableOfContent))
-                        .message("Toc Update Successful")
-                        .status(OK)
-                        .build()
-        );
+    @ResponseStatus(HttpStatus.OK)
+    public TableOfContentDto updateTableOfContentElement(@Valid @RequestBody TableOfContentDto tableOfContentDto){
+        return tableOfContentService.updateTableOfContentElements(tableOfContentDto);
     }
     
     @DeleteMapping("{id}")
-    public ResponseEntity<ApiResponse> removeTableOfContentElement(@PathVariable Long id){
-        List<TableOfContentDto> tableOfContent = tableOfContentService.removeTableOfContentElement(id);
-        return ResponseEntity.ok(
-                ApiResponse.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .data(Map.of("toc", tableOfContent))
-                        .message("Toc Delete Successful")
-                        .status(OK)
-                        .build()
-        );
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeTableOfContentElement(@PathVariable Long id){
+        tableOfContentService.removeTableOfContentElement(id);
     }
     
     @GetMapping("{id}")
-    public ResponseEntity<ApiResponse> getTableOfContents(@PathVariable Long id){
-        List<TableOfContentDto> tableOfContentElements = tableOfContentService.getTableOfContentForWedding(id);
-        return ResponseEntity.ok(
-                ApiResponse.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .data(Map.of("toc", tableOfContentElements))
-                        .message("Table Of Content Successful")
-                        .status(OK)
-                        .build()
-        );
+    @ResponseStatus(HttpStatus.OK)
+    public List<TableOfContentDto> getTableOfContents(@PathVariable Long id){
+        return tableOfContentService.getTableOfContentForWedding(id);
     }
 }

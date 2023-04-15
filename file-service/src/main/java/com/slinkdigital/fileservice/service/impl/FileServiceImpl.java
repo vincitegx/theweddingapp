@@ -11,9 +11,9 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.Resource;
@@ -29,7 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 @Primary
 @Slf4j
-public class FileServiceImpl implements FileService{
+public class FileServiceImpl implements FileService {
 
     private Path fileStoragePath;
     private String fileStorageLocation;
@@ -43,30 +43,29 @@ public class FileServiceImpl implements FileService{
         } catch (IOException ex) {
             throw new IOException("Could not create the directory where the uploaded files will be stored.", ex);
         }
-    }        
-    
+    }
+
     @Override
     public String uploadFile(MultipartFile file, String extension) {
-//        var filenameExtension = StringUtils.getFilenameExtension(file.getOriginalFilename());
         var key = UUID.randomUUID().toString() + "." + extension;
+        String directory = this.fileStorageLocation;
+        Path newPath = Paths.get(directory).toAbsolutePath().normalize();
         try {
-            String directory = this.fileStorageLocation;
-            Path newPath = Paths.get(directory).toAbsolutePath().normalize();
             Files.createDirectories(newPath);
-            Files.copy(file.getInputStream(), newPath.resolve(StringUtils.cleanPath(key)),StandardCopyOption.REPLACE_EXISTING);
-            return key;
-        } catch (IOException e) {
-            throw new RuntimeException("Could not store the file. Error: " + e.getMessage());
-          }
+            Files.copy(file.getInputStream(), newPath.resolve(StringUtils.cleanPath(key)), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException ex) {
+            Logger.getLogger(FileServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return key;
     }
 
     @Override
     public List<String> uploadFiles(List<MultipartFile> files, List<String> extensions) {
         List<String> filenames = new ArrayList<>();
-       files.forEach(file ->{
-           filenames.add(uploadFile(file, extensions.get(files.indexOf(file))));
-       });
-       return filenames;
+        files.forEach(file -> {
+            filenames.add(uploadFile(file, extensions.get(files.indexOf(file))));
+        });
+        return filenames;
     }
 
     @Override
@@ -79,11 +78,11 @@ public class FileServiceImpl implements FileService{
         } catch (MalformedURLException ex) {
             throw new FileServiceException("Issue Reading this file", ex);
         }
-        if(resource.exists()){
+        if (resource.exists()) {
             return resource;
-        }else{
+        } else {
             throw new FileServiceException("This file does not exist or is not readable");
         }
     }
-    
+
 }

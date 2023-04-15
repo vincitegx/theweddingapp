@@ -40,8 +40,4 @@ public class RefreshToken implements Serializable {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
     }
-    
-    public boolean isExpired() {
-        return LocalDateTime.now().isAfter(expiresAt);
-    }
 }

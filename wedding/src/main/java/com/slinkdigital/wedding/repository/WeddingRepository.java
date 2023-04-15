@@ -17,18 +17,23 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface WeddingRepository extends JpaRepository<Wedding, Long>{
-//    Optional<List<Wedding>> findByCouple(Couple couple); 
     List<Wedding> findByAuthorIdOrSpouseId(Long authorId, Long spouseId);
     List<Wedding> findByIsPublishedAndAuthorIdOrSpouseId(Boolean isPublished, Long authorId, Long spouseId);
     Optional<Wedding> findByCode(String code);
     
-    Page<Wedding> findByTitleContains(String title, Pageable page);
+    Page<Wedding> findByTitleContains(String title, Pageable pageable);
+    
+    List<Wedding> findAllByIsPublishedAndWeddingTypeAndTitleContainsAndDateOfWeddingAfterOrderByDateOfWeddingAsc(Boolean isPublished, WeddingType weddingType, String title,Date date, Pageable pageable);
+    
+    List<Wedding> findAllByIsPublishedAndWeddingTypeAndTitleContainsAndDateOfWeddingBeforeOrderByDateOfWeddingAsc(Boolean isPublished, WeddingType weddingType, String title,Date date, Pageable pageable);
+    
+    List<Wedding> findAllByIsPublishedAndWeddingTypeAndTitleContainsAndDateOfWeddingEqualsOrderByDateOfWeddingAsc(Boolean isPublished, WeddingType weddingType, String title,Date date, Pageable pageable);
     
 //    @Query(value="SELECT w.* FROM wedding w ORDER BY w.dateOfWedding DESC", nativeQuery = true)	
     @Query(value ="select w from wedding w where is_published like %?1% and wedding_type like %?2% and title like %?3%", nativeQuery = true)
-    Page<Wedding> findByIsPublishedAndWeddingTypeAndTitleContains(Boolean isPublished, WeddingType weddingType, String title, Pageable pageable);
+    List<Wedding> findByIsPublishedAndWeddingTypeAndTitleContains(Boolean isPublished, WeddingType weddingType, String title, Pageable pageable);
     
 
     @Query(value ="select w from wedding w where is_published like %?1% and wedding_type like %?2% and title like %?3% and date_of_wedding like %?4%", nativeQuery = true)
-    Page<Wedding> findByIsPublishedAndWeddingTypeAndTitleContainsAndDateOfWedding(Boolean isPublished, WeddingType weddingType, String title,Date date, Pageable pageable);
+    List<Wedding> findByIsPublishedAndWeddingTypeAndTitleContainsAndDateOfWedding(Boolean isPublished, WeddingType weddingType, String title,Date date);
 }

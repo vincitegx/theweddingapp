@@ -3,6 +3,7 @@ package com.slinkdigital.wedding.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import com.slinkdigital.wedding.domain.Photo;
+import jakarta.validation.constraints.Max;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,10 +28,11 @@ public class GalleryDto {
     
     private WeddingDto wedding;
     
+    @Max(4)
     private List<Photo> preWeddingPhotos;
-    
+    @Max(4)
     private List<Photo> weddingPhotos;
-    
+    @Max(4)
     private List<Photo> postWeddingPhotos;
     
 }

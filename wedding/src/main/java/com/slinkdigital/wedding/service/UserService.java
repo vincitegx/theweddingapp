@@ -18,14 +18,10 @@ public class UserService {
     private final WebClient.Builder webClientBuilder;
     private final HttpServletRequest request;
 
-    public Boolean addRoleCouple(List<Long> couples) {
-        return webClientBuilder.build().post()
+    public void addRoleCouple(List<Long> couples) {
+        webClientBuilder.build().post()
                 .uri("http://gateway-service/api/us/v1/users/roles/couple",
                         uriBuilder -> uriBuilder.queryParam("couple", couples).build())
-                .header("authorization", request.getHeader(HttpHeaders.AUTHORIZATION))
-                .retrieve()
-                .bodyToMono(Boolean.class)
-                .block();
+                .header("authorization", request.getHeader(HttpHeaders.AUTHORIZATION));
     }
-
 }

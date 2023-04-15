@@ -1,18 +1,15 @@
 package com.slinkdigital.wedding.controller;
 
-import com.slinkdigital.wedding.dto.ApiResponse;
 import com.slinkdigital.wedding.dto.GuestDto;
 import com.slinkdigital.wedding.service.GuestService;
-import java.time.LocalDateTime;
-import java.util.Map;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import static org.springframework.http.HttpStatus.OK;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -23,32 +20,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("api/wu/v1/weddings")
 @RequiredArgsConstructor
 public class GuestController1 {
-    
+
     private final GuestService guestService;
-    
+
     @PostMapping("guests")
-    public ResponseEntity<ApiResponse> AddGuestByAnonymous(@Valid @RequestBody GuestDto guestDto){
-        guestDto = guestService.guestSelfAddition(guestDto);
-        return ResponseEntity.ok(
-                ApiResponse.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .data(Map.of("guest", guestDto))
-                        .message("Guest Addition Successful !!!")
-                        .status(OK)
-                        .build()
-        );
+    @ResponseStatus(HttpStatus.CREATED)
+    public GuestDto userRegistrationAsGuest(@Valid @RequestBody GuestDto guestDto) {
+        return guestService.guestSelfAddition(guestDto);
     }
-    
+
     @PutMapping("guests/response")
-    public ResponseEntity<ApiResponse> submitResponseToInvitation(@Valid @RequestBody GuestDto guestDto){
-        guestDto = guestService.submitInvitationResponse(guestDto);
-        return ResponseEntity.ok(
-                ApiResponse.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .data(Map.of("guest", guestDto))
-                        .message("Response Submitted Successfully")
-                        .status(OK)
-                        .build()
-        );
-    }    
+    @ResponseStatus(HttpStatus.OK)
+    public GuestDto submitResponseToInvitation(@Valid @RequestBody GuestDto guestDto) {
+        return guestService.submitInvitationResponse(guestDto);
+    }
 }

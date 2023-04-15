@@ -51,8 +51,4 @@ public class PasswordResetToken implements Serializable {
     protected void onCreate() {
         createdAt = Instant.now();
     }
-    
-    public boolean isExpired() {
-        return LocalDateTime.now().isAfter(expiresAt);
-    }
 }

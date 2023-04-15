@@ -46,16 +46,7 @@ package com.slinkdigital.fileservice.service.impl;
 //
 //        return awsS3Client.getResourceUrl(BUCKET_NAME, key);
 //    }
-//
-//    @Override
-//    public List<String> uploadFiles(List<MultipartFile> files, List<String> extensions) {
-//        List<String> fileUrls = new ArrayList<>();
-//        files.forEach(file->{
-//            fileUrls.add(uploadFile(file, extensions.get(files.indexOf(file))));
-//        });
-//        return fileUrls;
-//    }
-//
+
 //    @Override
 //    public Resource downloadFile(String fileName) {
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

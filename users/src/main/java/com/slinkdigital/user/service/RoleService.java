@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @RequiredArgsConstructor
-@Slf4j
 @Transactional
 public class RoleService {
 
@@ -31,28 +30,20 @@ public class RoleService {
     private final UserDtoMapper userDtoMapper;
 
     public UserDto setDefaultRole(Users user) {
-        try {
-            Role role = roleRepository.findByName(DefaultRoles.DEFAULT_ROLE);
-            Set<Role> roles = new HashSet<>();
-            roles.add(role);
-            user.setRoles(roles);
-            user = userRepository.saveAndFlush(user);
-            return userDtoMapper.apply(user);
-        } catch (RuntimeException ex) {
-            throw new UserException(ex.getMessage());
-        }
+        Role role = roleRepository.findByName(DefaultRoles.DEFAULT_ROLE);
+        Set<Role> roles = new HashSet<>();
+        roles.add(role);
+        user.setRoles(roles);
+        user = userRepository.saveAndFlush(user);
+        return userDtoMapper.apply(user);
     }
 
     public void addRoleCouple(List<Long> couple) {
-        try {
-            Role role = roleRepository.findByName(DefaultRoles.ROLE_COUPLE);
-            couple.forEach((c) -> {
-                Users user = userRepository.findById(c).orElseThrow(() -> new UserException("No user associated with this id:" + c));
-                user.getRoles().add(role);
-                userRepository.save(user);
-            });
-        } catch (RuntimeException ex) {
-            throw new UserException(ex.getMessage());
-        }
+        Role role = roleRepository.findByName(DefaultRoles.ROLE_COUPLE);
+        couple.forEach((c) -> {
+            Users user = userRepository.findById(c).orElseThrow(() -> new UserException("No user associated with this id:" + c));
+            user.getRoles().add(role);
+            userRepository.save(user);
+        });
     }
 }

@@ -42,9 +42,5 @@ public class EmailVerificationToken implements Serializable {
         this.user = user;
         this.expiresAt = expiresAt;
     }
-
-    public boolean isExpired() {
-        return LocalDateTime.now().isAfter(expiresAt);
-    }
 }
 

@@ -30,6 +30,8 @@ public class Budget implements Serializable {
     @Lob
     private String description;
     
+    private Integer amount;
+    
     @OneToOne
     private Wedding wedding;    
     

@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import jakarta.persistence.NoResultException;
 import jakarta.validation.ConstraintViolationException;
+import java.util.concurrent.ExecutionException;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -83,6 +84,11 @@ public class ApiExceptionHandler {
     @ExceptionHandler(UserException.class)
     public ResponseEntity<ApiResponse> userException(UserException exception) {
         return createApiResponse(BAD_REQUEST, exception.getMessage());
+    }
+
+    @ExceptionHandler(ExecutionException.class)
+    public ResponseEntity<ApiResponse> userException(ExecutionException exception) {
+        return createApiResponse(INTERNAL_SERVER_ERROR, exception.getMessage());
     }
     
     @ExceptionHandler(MethodArgumentNotValidException.class)

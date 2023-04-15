@@ -37,11 +37,6 @@
         </dependencies>
     </dependencyManagement>
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-properties-migrator</artifactId>
-            <scope>runtime</scope>
-        </dependency>
         <!--        <dependency>
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-exporter-zipkin</artifactId>
@@ -91,6 +86,11 @@
                     </executions>
                 </plugin>
                 <plugin>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
+                    <version>3.9.1</version>
+                </plugin>
+                <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>0.8.7</version>
@@ -111,33 +111,11 @@
                             </goals>
                         </execution>
                     </executions>
-                </plugin>		
+                </plugin>
                 <plugin>
-                    <groupId>com.google.cloud.tools</groupId>
-                    <artifactId>jib-maven-plugin</artifactId>
-                    <version>3.3.0</version>
-                    <configuration>
-                        <from>
-                            <image>openjdk:17-alpine@sha256:4b6abae565492dbe9e7a894137c966a7485154238902f2f25e9dbd9784383d81</image>
-                            <!--                            <platforms>
-                                <platform>
-                                    <architecture>amd64</architecture>
-                                    <os>windows</os>
-                                </platform>
-                            </platforms>-->
-                        </from>
-                        <to>
-                            <image>registry.hub.docker.com/davidtega/${project.artifactId}</image>
-                        </to>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>build</goal>
-                            </goals>
-                        </execution>
-                    </executions>
+                    <groupId>org.flywaydb</groupId>
+                    <artifactId>flyway-maven-plugin</artifactId>
+                    <version>9.8.1</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -151,17 +129,6 @@
                     <target>17</target>
                 </configuration>
             </plugin>
-            <!--            <plugin>
-                <groupId>com.google.cloud.tools</groupId>
-                <artifactId>jib-maven-plugin</artifactId>
-                <version>3.3.1</version>
-                <configuration>
-                    <from>
-                        <image>eclipse-temurin:17.0.4.1_1-jre</image>
-                    </from>
-                    <to><image>registry.hub.docker.com/davidtega/${project.artifactId}</image></to>
-                </configuration>
-            </plugin>-->
         </plugins>
     </build>
     <modules>
@@ -176,4 +143,29 @@
         <module>config-service</module>
         <module>admin</module>
     </modules>
+    
+    <profiles>
+        <profile>
+            <id>coverage</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

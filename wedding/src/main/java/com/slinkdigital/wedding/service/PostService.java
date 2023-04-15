@@ -1,6 +1,5 @@
 package com.slinkdigital.wedding.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.slinkdigital.wedding.domain.Post;
 import com.slinkdigital.wedding.domain.Wedding;
 import com.slinkdigital.wedding.dto.PostDto;
@@ -11,10 +10,11 @@ import com.slinkdigital.wedding.repository.PostRepository;
 import com.slinkdigital.wedding.repository.WeddingRepository;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import jakarta.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -39,121 +39,85 @@ public class PostService {
     private final WeddingRepository weddingRepository;
     private final FileService fileService;
     private final KafkaTemplate<String, PostDto> kafkaTemplate;
-    
-    
+
     public PostDto addPost(PostDto postDto, MultipartFile file) {
-        try {
-            Wedding wedding = weddingRepository.findById(postDto.getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
-            Long loggedInUser = getLoggedInUserId();
-            if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
-                throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
-            } else if (!wedding.isPublished()) {
-                throw new WeddingException("You have to publish this wedding first");
-            } else {
-                String fileUrl = fileService.uploadFile(file);
-                postDto.setCreatedAt(Instant.now());
+        Wedding wedding = weddingRepository.findById(postDto.getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
+        Long loggedInUser = getLoggedInUserId();
+        if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
+            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+        } else if (!wedding.getIsPublished()) {
+            throw new WeddingException("You have to publish this wedding first");
+        } else {
+            String fileUrl;
+            try {
+                fileUrl = fileService.uploadFile(file);
                 postDto.setFileUrl(fileUrl);
-                Post post = postMapper.mapDtoToPost(postDto);
-                post = postRepository.save(post);
-                postDto = postMapper.mapPostToDto(post);
-                kafkaTemplate.send("feed_topic", postDto);
-                return postDto;
+            } catch (IOException ex) {
+                Logger.getLogger(PostService.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } catch (WeddingException ex) {
-            throw new WeddingException(ex.getMessage());
+
+            Post post = postMapper.mapDtoToPost(postDto);
+            post.setCreatedAt(Instant.now());
+            post = postRepository.save(post);
+            postDto = postMapper.mapPostToDto(post);
+            kafkaTemplate.send("feed_topic", postDto);
+            return postDto;
         }
     }
 
     public List<PostDto> getAllPostForWedding(Long id) {
-        try {
-            Wedding wedding = weddingRepository.findById(id).orElseThrow(() -> new WeddingException("No Such Wedding"));
-            List<Post> posts = postRepository.findByWedding(wedding);
-            List<PostDto> postDto = new ArrayList<>(posts.size());
-            posts.forEach(p -> {
-                postDto.add(postMapper.mapPostToDto(p));
-            });
-            return postDto;
-        } catch (WeddingException ex) {
-            throw new WeddingException(ex.getMessage());
-        }
+        Wedding wedding = weddingRepository.findById(id).orElseThrow(() -> new WeddingException("No Such Wedding"));
+        List<Post> posts = postRepository.findByWedding(wedding);
+        List<PostDto> postDto = new ArrayList<>(posts.size());
+        posts.forEach(p -> {
+            postDto.add(postMapper.mapPostToDto(p));
+        });
+        return postDto;
     }
 
     public PostDto getPost(Long id) {
-        try {
-            Post post = postRepository.findById(id).orElseThrow(() -> new WeddingException("No Such Post Associated To This Id"));
-            PostDto postDto = postMapper.mapPostToDto(post);
-            return postDto;
-        } catch (WeddingException ex) {
-            throw new WeddingException(ex.getMessage());
-        }
+        Post post = postRepository.findById(id).orElseThrow(() -> new WeddingException("No Such Post Associated To This Id"));
+        PostDto postDto = postMapper.mapPostToDto(post);
+        return postDto;
     }
 
-    public PostDto convertWeddingToPost(Wedding wedding) throws JsonProcessingException {
-        try {
-//            wedding = weddingRepository.findById(wedding.getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
-            Long loggedInUser = getLoggedInUserId();
-            if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
-                throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
-            } else if (!wedding.isPublished()) {
-                throw new WeddingException("You have to publish this wedding first");
-            } else {
-                PostDto postDto = new PostDto();
-                postDto.setCreatedAt(Instant.now());
-                String fileUrl = "default-wedding.jpg";
-                if (wedding.getCoverFileUrl() != null) {
-                    fileUrl = wedding.getCoverFileUrl();
-                }
-                postDto.setFileUrl(fileUrl);
-                postDto.setCaption(wedding.getTitle());
-                postDto.setWedding(weddingMapper.mapWeddingToDto(wedding));
-                Post post = postMapper.mapDtoToPost(postDto);
-                post = postRepository.save(post);
-                // Send asynchronous notification with the PostDto details to the Feed microservice using Kafka
-//            ObjectMapper objectMapper = new ObjectMapper();
-//            String postJson = objectMapper.writeValueAsString(postDto);
-                postDto = postMapper.mapPostToDto(post);
-                kafkaTemplate.send("feed_topic", postDto);
-                return postDto;
-            }
-        } catch (WeddingException ex) {
-            throw new WeddingException(ex.getMessage());
+    public PostDto convertWeddingToPost(Wedding wedding) {
+        PostDto postDto = new PostDto();
+        String fileUrl = "default-wedding.jpg";
+        if (wedding.getCoverFileUrl() != null) {
+            fileUrl = wedding.getCoverFileUrl();
         }
+        postDto.setFileUrl(fileUrl);
+        postDto.setCaption(wedding.getTitle());
+        postDto.setWedding(weddingMapper.mapWeddingToDto(wedding));
+        Post post = postMapper.mapDtoToPost(postDto);
+        post.setCreatedAt(Instant.now());
+        post = postRepository.save(post);
+        // Send asynchronous notification with the PostDto details to the Feed microservice using Kafka
+        postDto = postMapper.mapPostToDto(post);
+        kafkaTemplate.send("feed_topic", postDto);
+        return postDto;
     }
 
     public PostDto editPost(PostDto postDto) {
-        try {
-            Post post = postRepository.findById(postDto.getId()).orElseThrow(() -> new WeddingException("No post associated with this Id"));
-            Wedding wedding = post.getWedding();
-            Long loggedInUser = getLoggedInUserId();
-            if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
-                throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
-            } else {
-                post.setCaption(postDto.getCaption());
-                post = postRepository.saveAndFlush(post);
-                return postMapper.mapPostToDto(post);
-            }
-        } catch (WeddingException ex) {
-            throw new WeddingException(ex.getMessage());
+        Post post = postRepository.findById(postDto.getId()).orElseThrow(() -> new WeddingException("No post associated with this Id"));
+        Wedding wedding = post.getWedding();
+        Long loggedInUser = getLoggedInUserId();
+        if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
+            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+        } else {
+            post.setCaption(postDto.getCaption());
+            post = postRepository.saveAndFlush(post);
+            return postMapper.mapPostToDto(post);
         }
     }
 
-    public Map<String, String> removePost(Long id) {
-        try {
-            Map<String, String> result = new HashMap<>();
-            Post post = postRepository.findById(id).orElseThrow(() -> new WeddingException("No post associated with this Id"));
-            postRepository.delete(post);
-            result.put("success", "Post Deleted Successfully");
-            return result;
-        } catch (WeddingException ex) {
-            throw new WeddingException(ex.getMessage());
-        }
+    public void removePost(Long id) {
+        Post post = postRepository.findById(id).orElseThrow(() -> new WeddingException("No post associated with this Id"));
+        postRepository.delete(post);
     }
 
     private Long getLoggedInUserId() {
-        try {
-            return Long.parseLong(request.getHeader("x-id"));
-        } catch (WeddingException ex) {
-            throw new WeddingException("You Need To Be Logged In !!!");
-        }
+        return Long.parseLong(request.getHeader("x-id"));
     }
 }

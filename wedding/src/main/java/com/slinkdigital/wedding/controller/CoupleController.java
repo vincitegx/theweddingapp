@@ -1,18 +1,14 @@
 package com.slinkdigital.wedding.controller;
 
-import com.slinkdigital.wedding.dto.ApiResponse;
 import com.slinkdigital.wedding.dto.CoupleDto;
 import com.slinkdigital.wedding.dto.SpouseRequest;
 import com.slinkdigital.wedding.mapper.CoupleMapper;
 import com.slinkdigital.wedding.service.CoupleService;
-import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.Set;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import static org.springframework.http.HttpStatus.OK;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,6 +17,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,180 +34,89 @@ public class CoupleController {
     private final CoupleMapper coupleMapper;
 
     @GetMapping("{weddingId}/couple")
-    public ResponseEntity<ApiResponse> getWeddingCouples(@PathVariable(value = "weddingId") Long id) {
-        Set<CoupleDto> couples = coupleService.getWeddingCouple(id);
-        return ResponseEntity.ok(
-                ApiResponse.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .data(Map.of("couple", couples))
-                        .message("List of Couple Successful")
-                        .status(OK)
-                        .build()
-        );
+    @ResponseStatus(HttpStatus.OK)
+    public Set<CoupleDto> getWeddingCouples(@PathVariable(value = "weddingId") Long id) {
+        return coupleService.getWeddingCouple(id);
     }
 
     @PostMapping(path = "couple/author", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<ApiResponse> addCoupleAuthor(@RequestParam("coupleDto") String coupleDto,
+    @ResponseStatus(HttpStatus.CREATED)
+    public CoupleDto addCoupleAuthor(@RequestParam("coupleDto") String coupleDto,
             @RequestParam("file") MultipartFile file) {
         CoupleDto couple = coupleMapper.getJson(coupleDto);
-        couple = coupleService.addCoupleAuthorInfo(couple, file);
-        return ResponseEntity.ok(
-                ApiResponse.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .data(Map.of("coupleAuthor", couple))
-                        .message("Couple Author Added Successfully")
-                        .status(OK)
-                        .build()
-        );
+        return coupleService.addCoupleAuthorInfo(couple, file);
     }
 
     @PostMapping(path = "couple/spouse", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<ApiResponse> addCoupleSpouse(@RequestParam("coupleDto") String coupleDto,
+    @ResponseStatus(HttpStatus.CREATED)
+    public CoupleDto addCoupleSpouse(@RequestParam("coupleDto") String coupleDto,
             @RequestParam("file") MultipartFile file) {
         CoupleDto couple = coupleMapper.getJson(coupleDto);
-        couple = coupleService.addCoupleSpouseInfo(couple, file);
-        return ResponseEntity.ok(
-                ApiResponse.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .data(Map.of("coupleSpouse", couple))
-                        .message("Couple Spouse Added Successfully")
-                        .status(OK)
-                        .build()
-        );
+        return coupleService.addCoupleSpouseInfo(couple, file);
     }
 
     @PutMapping(path = "couple/author")
-    public ResponseEntity<ApiResponse> updateCoupleAuthor(@RequestBody CoupleDto coupleDto) {
-        coupleDto = coupleService.updateCoupleAuthorInfo(coupleDto);
-        return ResponseEntity.ok(
-                ApiResponse.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .data(Map.of("coupleAuthor", coupleDto))
-                        .message("Update Successful")
-                        .status(OK)
-                        .build()
-        );
+    @ResponseStatus(HttpStatus.OK)
+    public CoupleDto updateCoupleAuthor(@RequestBody CoupleDto coupleDto) {
+        return coupleService.updateCoupleAuthorInfo(coupleDto);
     }
 
     @PutMapping(path = "couple/author-image", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<ApiResponse> updateCoupleAuthorImage(@RequestParam("coupleDto") String coupleDto,
+    @ResponseStatus(HttpStatus.OK)
+    public CoupleDto updateCoupleAuthorImage(@RequestParam("coupleDto") String coupleDto,
             @RequestParam("file") MultipartFile file) {
         CoupleDto couple = coupleMapper.getJson(coupleDto);
-        couple = coupleService.updateCoupleAuthorImage(couple, file);
-        return ResponseEntity.ok(
-                ApiResponse.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .data(Map.of("coupleAuthor", couple))
-                        .message("Image Update Successful")
-                        .status(OK)
-                        .build()
-        );
+        return coupleService.updateCoupleAuthorImage(couple, file);
     }
 
     @PutMapping(path = "couple/spouse")
-    public ResponseEntity<ApiResponse> updateCoupleSpouse(@RequestParam("coupleDto") String coupleDto) {
+    @ResponseStatus(HttpStatus.OK)
+    public CoupleDto updateCoupleSpouse(@RequestParam("coupleDto") String coupleDto) {
         CoupleDto couple = coupleMapper.getJson(coupleDto);
-        couple = coupleService.updateCoupleSpouseInfo(couple);
-        return ResponseEntity.ok(
-                ApiResponse.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .data(Map.of("coupleSpouse", couple))
-                        .message("Update Successful")
-                        .status(OK)
-                        .build()
-        );
+        return coupleService.updateCoupleSpouseInfo(couple);
     }
 
     @PostMapping(path = "couple/spouse-image", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<ApiResponse> updateCoupleSpouseImage(@RequestParam("coupleDto") String coupleDto,
+    @ResponseStatus(HttpStatus.OK)
+    public CoupleDto updateCoupleSpouseImage(@RequestParam("coupleDto") String coupleDto,
             @RequestParam("file") MultipartFile file) {
         CoupleDto couple = coupleMapper.getJson(coupleDto);
-        couple = coupleService.updateCoupleSpouseImage(couple, file);
-        return ResponseEntity.ok(
-                ApiResponse.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .data(Map.of("coupleAuthor", couple))
-                        .message("Update Successful")
-                        .status(OK)
-                        .build()
-        );
+        return coupleService.updateCoupleSpouseImage(couple, file);
     }
 
     @PostMapping("couple/request")
-    public ResponseEntity<ApiResponse> sendCoupleRequest(@Valid @RequestBody SpouseRequest emailRequest) {
-        Map<String, String> coupleRequestStatus = coupleService.sendCoupleRequest(emailRequest);
-        return ResponseEntity.ok(
-                ApiResponse.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .data(Map.of("isCoupleRequestSent", true))
-                        .message(coupleRequestStatus.get("success"))
-                        .status(OK)
-                        .build()
-        );
+    @ResponseStatus(HttpStatus.OK)
+    public void sendCoupleRequest(@Valid @RequestBody SpouseRequest emailRequest) {
+        coupleService.sendCoupleRequest(emailRequest);
     }
 
     @DeleteMapping("couple/request")
-    public ResponseEntity<ApiResponse> removeCoupleRequest(@Valid @RequestBody SpouseRequest emailRequest) {
-        Map<String, String> coupleRequestStatus = coupleService.removeCoupleRequest(emailRequest);
-        return ResponseEntity.ok(
-                ApiResponse.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .data(Map.of("isCoupleRequestRemoved", true))
-                        .message(coupleRequestStatus.get("success"))
-                        .status(OK)
-                        .build()
-        );
+    @ResponseStatus(HttpStatus.OK)
+    public void removeCoupleRequest(@Valid @RequestBody SpouseRequest emailRequest) {
+        coupleService.removeCoupleRequest(emailRequest);
     }
 
     @DeleteMapping("couple/spouse")
-    public ResponseEntity<ApiResponse> removeCoupleSpouse(@Valid @RequestBody CoupleDto coupleDto) {
-        Map<String, String> coupleSpouseRemovalStatus = coupleService.removeCoupleSpouse(coupleDto);
-        return ResponseEntity.ok(
-                ApiResponse.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .data(Map.of("isCoupleSpouseRemoved", true))
-                        .message(coupleSpouseRemovalStatus.get("success"))
-                        .status(OK)
-                        .build()
-        );
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeCoupleSpouse(@Valid @RequestBody CoupleDto coupleDto) {
+        coupleService.removeCoupleSpouse(coupleDto);
     }
 
     @GetMapping("couple/request")
-    public ResponseEntity<ApiResponse> viewAuthorRequest(@RequestParam String requestToken) {
-        CoupleDto couple = coupleService.viewAuthorRequest(requestToken);
-        return ResponseEntity.ok(
-                ApiResponse.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .data(Map.of("couple", couple))
-                        .message("Couple Request Successful")
-                        .status(OK)
-                        .build()
-        );
+    @ResponseStatus(HttpStatus.OK)
+    public CoupleDto viewAuthorRequest(@RequestParam String requestToken) {
+        return coupleService.viewAuthorRequest(requestToken);
     }
 
     @PutMapping("couple/accept-request")
-    public ResponseEntity<ApiResponse> acceptAuthorRequest(@RequestParam String requestToken) {
+    @ResponseStatus(HttpStatus.OK)
+    public void acceptAuthorRequest(@RequestParam String requestToken) {
         coupleService.acceptAuthorRequest(requestToken);
-        return ResponseEntity.ok(
-                ApiResponse.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .data(Map.of("isCoupleRequestAccepted", true))
-                        .message("Couple Request Accepted")
-                        .status(OK)
-                        .build()
-        );
     }
 
     @PutMapping("couple/reject-request")
-    public ResponseEntity<ApiResponse> rejectAuthorRequest(@RequestParam String requestToken) {
+    @ResponseStatus(HttpStatus.OK)
+    public void rejectAuthorRequest(@RequestParam String requestToken) {
         coupleService.rejectAuthorRequest(requestToken);
-        return ResponseEntity.ok(
-                ApiResponse.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .data(Map.of("isCoupleRequestRejected", true))
-                        .message("Couple Request Rejected")
-                        .status(OK)
-                        .build()
-        );
     }
 }

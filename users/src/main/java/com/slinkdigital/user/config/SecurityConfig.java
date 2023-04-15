@@ -10,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 
 /**
  *
@@ -21,7 +22,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.cors();
+        httpSecurity.cors(Customizer.withDefaults());
         httpSecurity.securityMatcher("/api/uu/v1/users/**");
         httpSecurity.authorizeHttpRequests()
                 .requestMatchers("/v3/api-docs/**","/v2/api-docs/**", "/swagger-ui/**", "/webjars/**", "/assests/**", "/resources/**", "/swagger-ui.html").permitAll()

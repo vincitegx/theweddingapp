@@ -5,7 +5,6 @@ import com.slinkdigital.user.domain.security.Role;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,6 +15,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.slinkdigital.user.repository.UserRepository;
+import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -34,8 +36,11 @@ public class UserDetailsServiceImpl implements UserDetailsService{
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Users user = userRepository.findByEmail(email).orElseThrow(()-> new UsernameNotFoundException("User not found with email "+ email));
-        validateLoginAttempt(user);
-        log.info(user.toString());
+        try {
+            validateLoginAttempt(user);
+        } catch (ExecutionException ex) {
+            Logger.getLogger(UserDetailsServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
         return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), user.getEnabled(), true, true, user.getNonLocked(), getAuthorities(user));
     }
     private Collection<? extends GrantedAuthority> getAuthorities(Users user) {
@@ -47,7 +52,7 @@ public class UserDetailsServiceImpl implements UserDetailsService{
         return authorities;
     }
     
-    private void validateLoginAttempt(Users user) {
+    private void validateLoginAttempt(Users user) throws ExecutionException {
         if(user.getNonLocked()) {
             if(loginAttemptService.hasExceededMaxAttempts(user.getEmail())) {
                 user.setNonLocked(Boolean.FALSE);

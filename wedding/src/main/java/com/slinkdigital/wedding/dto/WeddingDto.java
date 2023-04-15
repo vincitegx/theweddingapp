@@ -53,7 +53,7 @@ public class WeddingDto {
 
     private String weddingStory;
     
-    private boolean isPublished;
+    private Boolean isPublished;
     
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date publishDate;

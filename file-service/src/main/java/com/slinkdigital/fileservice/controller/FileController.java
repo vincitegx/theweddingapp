@@ -26,10 +26,4 @@ public class FileController {
         String uri = fileService.uploadFile(file, ext);
         return ResponseEntity.ok(uri);
     }
-    
-//    @PostMapping(path="/uploadFiles", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-//    public ResponseEntity<List<String>> uploadFiles(@RequestParam("files") List<MultipartFile> files,@RequestParam("exts") List<String> extensions){
-//        List<String> uri = fileService.uploadFiles(files, extensions);
-//        return ResponseEntity.ok(uri);
-//    }
 }

@@ -10,7 +10,6 @@ import com.slinkdigital.wedding.repository.WeddingRepository;
 import java.util.Objects;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 @RequiredArgsConstructor
-@Slf4j
 public class GuestSettingService {
 
     private final GuestSettingRepository guestSettingRepository;
@@ -85,10 +83,6 @@ public class GuestSettingService {
     }
 
     private Long getLoggedInUserId() {
-        try {
-            return Long.parseLong(request.getHeader("x-id"));
-        } catch (WeddingException ex) {
-            throw new WeddingException("You Need To Be Logged In !!!");
-        }
+        return Long.parseLong(request.getHeader("x-id"));
     }
 }

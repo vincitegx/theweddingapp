@@ -41,7 +41,7 @@ public class CommentService {
         }
     }
 
-    public List<CommentDto> addComment(CommentDto commentDto) {
+    public CommentDto addComment(CommentDto commentDto) {
         try {
             Comment comment = Comment.builder()
                     .message(commentDto.getMessage())
@@ -50,43 +50,27 @@ public class CommentService {
                     .wedding(weddingMapper.mapWeddingDtoToWedding(commentDto.getWedding()))
                     .build();
             comment = commentRepository.save(comment);
-            List<Comment> comments = commentRepository.findByWedding(comment.getWedding());
-            List<CommentDto> commentDtos = new ArrayList<>();
-            comments.forEach(c -> {
-                commentDtos.add(commentMapper.mapCommentToDto(c));
-            });
-            return commentDtos;
+            return commentMapper.mapCommentToDto(comment);
         } catch (RuntimeException ex) {
             throw new WeddingException(ex.getMessage());
         }
     }
 
-    public List<CommentDto> removeComment(Long id) {
+    public void removeComment(Long id) {
         try {
             Comment comment = commentRepository.findById(id).orElseThrow(() -> new WeddingException("No such comment"));
             commentRepository.delete(comment);
-            List<Comment> comments = commentRepository.findByWedding(comment.getWedding());
-            List<CommentDto> commentDtos = new ArrayList<>();
-            comments.forEach(c -> {
-                commentDtos.add(commentMapper.mapCommentToDto(c));
-            });
-            return commentDtos;
         } catch (WeddingException ex) {
             throw new WeddingException(ex.getMessage());
         }
     }
 
-    public List<CommentDto> updateComment(CommentDto commentDto) {
+    public CommentDto updateComment(CommentDto commentDto) {
         try {
             Comment comment = commentRepository.findById(commentDto.getId()).orElseThrow(() -> new WeddingException("No such comment"));
             comment.setMessage(commentDto.getMessage());
-            commentRepository.saveAndFlush(comment);
-            List<Comment> comments = commentRepository.findByWedding(comment.getWedding());
-            List<CommentDto> commentDtos = new ArrayList<>();
-            comments.forEach(c -> {
-                commentDtos.add(commentMapper.mapCommentToDto(c));
-            });
-            return commentDtos;
+            comment = commentRepository.saveAndFlush(comment);
+            return commentMapper.mapCommentToDto(comment);
         } catch (WeddingException ex) {
             throw new WeddingException(ex.getMessage());
         }
