@@ -47,7 +47,6 @@ public class GiftAndSupportService {
 
     public GiftAndSupportDto update(GiftAndSupportDto giftAndSupportDto) {
         GiftAndSupport giftAndSupport = giftAndSupportRepository.findById(giftAndSupportDto.getId()).orElseThrow(() -> new WeddingException("No such Gift Or Support With That Id"));
-        giftAndSupport.setItemLink(giftAndSupportDto.getItemLink());
         giftAndSupport = giftAndSupportRepository.saveAndFlush(giftAndSupport);
         return gsm.mapGiftAndSupportToDto(giftAndSupport);
     }

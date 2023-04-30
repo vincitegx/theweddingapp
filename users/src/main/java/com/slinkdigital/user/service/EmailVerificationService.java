@@ -40,7 +40,7 @@ public class EmailVerificationService {
     private final KafkaTemplate<String, EventDto> kakfaTemplate;
     private final UserRepository userRepository;
     private final UserDtoMapper userDtoMapper;
-    private final Clock clock;
+    private final Clock clock = Clock.systemUTC();
 
     public String registerVerificationTokenToDb(UserDto userDto) {
         String generatedToken = UUID.randomUUID().toString();

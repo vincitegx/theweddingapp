@@ -31,8 +31,7 @@ public class LoginAttemptService {
     }
 
     public void addUserToLoginAttemptCache(String username) throws ExecutionException {
-        int attempts = 0;
-        attempts = ATTEMPT_INCREMENT + loginAttemptCache.get(username);
+        int attempts = ATTEMPT_INCREMENT + loginAttemptCache.get(username);
         loginAttemptCache.put(username, attempts);
     }
 

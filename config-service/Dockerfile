@@ -9,5 +9,6 @@ COPY --from=builder extracted/dependencies/ ./
 COPY --from=builder extracted/spring-boot-loader/ ./
 COPY --from=builder extracted/snapshot-dependencies/ ./
 COPY --from=builder extracted/application/ ./
-EXPOSE 8084
+USER tega
+EXPOSE 8888
 ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher"]

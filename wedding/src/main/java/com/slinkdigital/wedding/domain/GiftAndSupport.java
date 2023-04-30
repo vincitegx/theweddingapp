@@ -24,17 +24,12 @@ public class GiftAndSupport implements Serializable {
     @Column(nullable = false, updatable = false)
     private Long id;
     
-    private String name;
+    private String sender;
     
     @ManyToOne
     private Wedding wedding;
     
-    private String itemLink;
-    
-    @Lob
-    private String description;
-    
     @Column(nullable = false)
-    private Instant createdAt;    
+    private Instant createdAt;
     
 }

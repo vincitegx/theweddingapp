@@ -2,9 +2,11 @@ package com.slinkdigital.apigateway.config;
 
 import com.slinkdigital.apigateway.dto.ErrorResponse;
 import com.slinkdigital.apigateway.dto.UserDto;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
@@ -35,6 +37,7 @@ public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> 
     }
 
     @Override
+    @CircuitBreaker(name = "user", fallbackMethod = "fallbackMethod")
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {
             try {
@@ -75,6 +78,10 @@ public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> 
         };
     }
 
+    public CompletableFuture<String> fallbackMethod(Config config, RuntimeException runtimeException) {
+        return CompletableFuture.supplyAsync(() -> "Oops! Something went wrong, please try again later!");
+    }
+    
     public static class Config {
     }
 }

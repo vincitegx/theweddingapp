@@ -1,6 +1,6 @@
 package com.slinkdigital.wedding.service;
 
-import com.slinkdigital.wedding.domain.Message;
+import com.slinkdigital.wedding.domain.GuestMessage;
 import com.slinkdigital.wedding.domain.Wedding;
 import com.slinkdigital.wedding.dto.MessageGuestDto;
 import com.slinkdigital.wedding.dto.GuestMessageDto;
@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.slinkdigital.wedding.repository.MessageRepository;
+import java.time.LocalDateTime;
 
 /**
  *
@@ -39,7 +40,7 @@ public class GuestMessageService {
         } else if (!wedding.getIsPublished()) {
             throw new WeddingException("You have to publish this wedding first");
         } else {
-            List<Message> messageToGuests = messageToGuestRepository.findByWedding(wedding);
+            List<GuestMessage> messageToGuests = messageToGuestRepository.findByWedding(wedding);
             List<GuestMessageDto> messageToGuestDtos = new ArrayList<>(messageToGuests.size());
             messageToGuests.forEach(m -> {
                 messageToGuestDtos.add(msgToGuestMapper.mapMessageToGuestToDto(m));
@@ -49,7 +50,7 @@ public class GuestMessageService {
     }
 
     public GuestMessageDto getMessage(Long id) {
-        Message messageToGuest = messageToGuestRepository.findById(id).orElseThrow(() -> new WeddingException("No such message associated to this Id"));
+        GuestMessage messageToGuest = messageToGuestRepository.findById(id).orElseThrow(() -> new WeddingException("No such message associated to this Id"));
         Wedding wedding = messageToGuest.getWedding();
         Long loggedInUser = getLoggedInUserId();
         if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
@@ -69,14 +70,15 @@ public class GuestMessageService {
         } else if (!wedding.getIsPublished()) {
             throw new WeddingException("You have to publish this wedding first");
         } else {
-            Message messageToGuest = msgToGuestMapper.mapDtoToMessageToGuest(messageToGuestDto);
+            messageToGuestDto.setCreatedAt(LocalDateTime.now());
+            GuestMessage messageToGuest = msgToGuestMapper.mapDtoToMessageToGuest(messageToGuestDto);
             messageToGuest = messageToGuestRepository.save(messageToGuest);
             return msgToGuestMapper.mapMessageToGuestToDto(messageToGuest);
         }
     }
 
     public GuestMessageDto putContent(GuestMessageDto messageToGuestDto) {
-        Message messageToGuest = messageToGuestRepository.findById(messageToGuestDto.getId()).orElseThrow(() -> new WeddingException("No such message associated to this Id"));
+        GuestMessage messageToGuest = messageToGuestRepository.findById(messageToGuestDto.getId()).orElseThrow(() -> new WeddingException("No such message associated to this Id"));
         Wedding wedding = messageToGuest.getWedding();
         Long loggedInUser = getLoggedInUserId();
         if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
@@ -92,7 +94,7 @@ public class GuestMessageService {
     }
 
     public void deleteMessage(Long id) {
-        Message messageToGuest = messageToGuestRepository.findById(id).orElseThrow(() -> new WeddingException("No such message associated to this Id"));
+        GuestMessage messageToGuest = messageToGuestRepository.findById(id).orElseThrow(() -> new WeddingException("No such message associated to this Id"));
         Wedding wedding = messageToGuest.getWedding();
         Long loggedInUser = getLoggedInUserId();
         if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
@@ -105,7 +107,7 @@ public class GuestMessageService {
     }
 
     public void sendMessageToGuests(MessageGuestDto messageGuestDto) {
-        Message messageToGuest = messageToGuestRepository.findById(messageGuestDto.getMessage().getId()).orElseThrow(() -> new WeddingException("No such message associated to this Id"));
+        GuestMessage messageToGuest = messageToGuestRepository.findById(messageGuestDto.getMessage().getId()).orElseThrow(() -> new WeddingException("No such message associated to this Id"));
         Wedding wedding = messageToGuest.getWedding();
         Long loggedInUser = getLoggedInUserId();
         if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {

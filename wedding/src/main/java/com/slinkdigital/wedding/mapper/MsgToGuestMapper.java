@@ -1,6 +1,6 @@
 package com.slinkdigital.wedding.mapper;
 
-import com.slinkdigital.wedding.domain.Message;
+import com.slinkdigital.wedding.domain.GuestMessage;
 import com.slinkdigital.wedding.dto.GuestMessageDto;
 import com.slinkdigital.wedding.mapper.WeddingMapper;
 import lombok.RequiredArgsConstructor;
@@ -16,8 +16,8 @@ public class MsgToGuestMapper {
 
     private final WeddingMapper weddingMapper;
 
-    public Message mapDtoToMessageToGuest(GuestMessageDto messageToGuestDto) {
-        return Message.builder()
+    public GuestMessage mapDtoToMessageToGuest(GuestMessageDto messageToGuestDto) {
+        return GuestMessage.builder()
                 .id(messageToGuestDto.getId())
                 .wedding(weddingMapper.mapWeddingDtoToWedding(messageToGuestDto.getWedding()))
                 .title(messageToGuestDto.getTitle())
@@ -26,7 +26,7 @@ public class MsgToGuestMapper {
                 .build();
     }
 
-    public GuestMessageDto mapMessageToGuestToDto(Message messageToGuest) {
+    public GuestMessageDto mapMessageToGuestToDto(GuestMessage messageToGuest) {
         return GuestMessageDto.builder()
                 .id(messageToGuest.getId())
                 .wedding(weddingMapper.mapWeddingToDto(messageToGuest.getWedding()))

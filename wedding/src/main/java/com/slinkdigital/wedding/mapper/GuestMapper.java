@@ -22,7 +22,6 @@ public class GuestMapper {
                 .name(guest.getName())
                 .email(guest.getEmail())
                 .guestStatus(guest.getGuestStatus())
-                .availabilityStatus(guest.getAvailabilityStatus())
                 .createdAt(guest.getCreatedAt())
                 .build();
     }
@@ -33,7 +32,6 @@ public class GuestMapper {
                 .email(guestDto.getEmail())
                 .name(guestDto.getName())
                 .guestStatus(guestDto.getGuestStatus())
-                .availabilityStatus(guestDto.getAvailabilityStatus())
                 .createdAt(guestDto.getCreatedAt())
                 .build();
     }

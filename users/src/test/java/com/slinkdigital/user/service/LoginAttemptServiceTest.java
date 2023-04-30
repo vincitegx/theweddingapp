@@ -5,13 +5,11 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import java.util.concurrent.ExecutionException;
 import static java.util.concurrent.TimeUnit.MINUTES;
-import org.assertj.core.api.Assertions;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
@@ -24,8 +22,9 @@ public class LoginAttemptServiceTest {
     private static final int MAXIMUM_NUMBER_OF_ATTEMPTS = 5;
     private static final int ATTEMPT_INCREMENT = 1;
     private static final String USERNAME = "username";
-    @Mock
+    
     private LoadingCache<String, Integer> loginAttemptCache;
+    
     private LoginAttemptService underTest;
     /**
      * Test of evictUserFromLoginAttemptCache method, of class LoginAttemptService.
@@ -33,6 +32,7 @@ public class LoginAttemptServiceTest {
     
     @BeforeEach
     public void setUp(){
+        underTest = new LoginAttemptService();
         loginAttemptCache = CacheBuilder.newBuilder().expireAfterWrite(15, MINUTES)
                 .maximumSize(100).build(new CacheLoader<String, Integer>() {
                     @Override
@@ -43,9 +43,9 @@ public class LoginAttemptServiceTest {
     }
     
     @Test
-    @Disabled
-    public void testEvictUserFromLoginAttemptCache() {
-        Mockito.verify(underTest).evictUserFromLoginAttemptCache(USERNAME);
+    public void testEvictUserFromLoginAttemptCache() throws ExecutionException {
+        underTest.evictUserFromLoginAttemptCache(USERNAME);
+        assertThat(loginAttemptCache.get(USERNAME)).isEqualTo(0);
     }
 
     /**
@@ -53,11 +53,10 @@ public class LoginAttemptServiceTest {
      * @throws java.util.concurrent.ExecutionException
      */
     @Test
-    @Disabled
     public void testAddUserToLoginAttemptCache() throws ExecutionException {
-        int attempts = 0;
-        attempts = ATTEMPT_INCREMENT + loginAttemptCache.get(USERNAME);
-        Mockito.verify(loginAttemptCache).put(USERNAME, attempts);
+        int attempts = ATTEMPT_INCREMENT + loginAttemptCache.get(USERNAME);
+        loginAttemptCache.put(USERNAME, attempts);
+        assertThat(loginAttemptCache.get(USERNAME)).isEqualTo(1);
     }
 
     /**
@@ -67,6 +66,6 @@ public class LoginAttemptServiceTest {
     @Test
     @Disabled
     public void testHasExceededMaxAttempts() throws ExecutionException {
-        Assertions.assertThat(loginAttemptCache.get(USERNAME)).isGreaterThanOrEqualTo(MAXIMUM_NUMBER_OF_ATTEMPTS);
+        assertThat(loginAttemptCache.get(USERNAME)).isGreaterThanOrEqualTo(MAXIMUM_NUMBER_OF_ATTEMPTS);
     }    
 }

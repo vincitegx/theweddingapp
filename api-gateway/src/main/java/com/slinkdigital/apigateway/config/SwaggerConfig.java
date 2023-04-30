@@ -32,7 +32,6 @@ public class SwaggerConfig {
         assert definitions != null;
         definitions.stream().filter(routeDefinition -> routeDefinition.getId().matches(".*-service")).forEach(routeDefinition -> {
             String name = routeDefinition.getId();
-            log.info(name);
             GroupedOpenApi.builder().pathsToMatch("/" + name + "/**").group(name).build();
         });
         return groups;

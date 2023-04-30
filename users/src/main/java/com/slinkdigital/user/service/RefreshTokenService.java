@@ -29,7 +29,7 @@ public class RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtProvider jwtProvider;
     private final UserDtoMapper userDtoMapper;
-    private final Clock clock;
+    private final Clock clock = Clock.systemDefaultZone();
 
     public String generateRefreshToken(Users user) {
         RefreshToken refreshToken = new RefreshToken();

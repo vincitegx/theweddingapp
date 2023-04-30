@@ -39,9 +39,6 @@ public class PasswordResetToken implements Serializable {
     @Column(nullable = false)
     private LocalDateTime expiresAt;
     
-    @ManyToOne
-    private Users user;
-    
     public PasswordResetToken(String email, LocalDateTime expiresAt) {
         this.email = email;
         this.expiresAt = expiresAt;

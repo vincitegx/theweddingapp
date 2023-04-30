@@ -11,8 +11,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public class DefaultRoles {
     
-    public static final String DEFAULT_ROLE = "ROLE_USER";
-    public static final String ROLE_COUPLE = "ROLE_COUPLE";
-    public static final String ROLE_VENDOR = "ROLE_VENDOR";
-    
+    public static final String DEFAULT_ROLE = "user";
+    public static final String ROLE_COUPLE = "couple";
+    public static final String ROLE_VENDOR = "vendor";
+    public static final String ROLE_ADMIN = "admin";
 }

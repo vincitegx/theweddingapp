@@ -1,0 +1,1 @@
+SELECT 'CREATE DATABASE vendors' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'vendors')\gexec

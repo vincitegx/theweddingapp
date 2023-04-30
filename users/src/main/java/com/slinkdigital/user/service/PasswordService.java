@@ -38,7 +38,7 @@ public class PasswordService {
     private final PasswordEncoder passwordEncoder;
     private final KafkaTemplate<String, EventDto> kakfaTemplate;
     private final HttpServletRequest request;
-    private final Clock clock;
+    private final Clock clock = Clock.systemDefaultZone();
 
     @Value("${password.reset.token.expiration.time.hours}")
     private Long passwordResetTokenExpirationTimeInHours;

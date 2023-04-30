@@ -30,6 +30,8 @@ public class GuestMessageDto {
     
     private String content;
     
+    private String link;
+    
     private LocalDateTime createdAt;
     
 }

@@ -1,6 +1,5 @@
 package com.slinkdigital.wedding.domain;
 
-import com.slinkdigital.wedding.constant.AvailabilityStatus;
 import com.slinkdigital.wedding.constant.GuestStatus;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -31,10 +30,6 @@ public class Guest implements Serializable {
     private String email; 
     
     private String name;
-    
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private AvailabilityStatus availabilityStatus;
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
