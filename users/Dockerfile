@@ -9,6 +9,9 @@ COPY --from=builder extracted/dependencies/ ./
 COPY --from=builder extracted/spring-boot-loader/ ./
 COPY --from=builder extracted/snapshot-dependencies/ ./
 COPY --from=builder extracted/application/ ./
+RUN apk del .build-deps && \
+    rm -rf /var/cache/apk/* /tmp/* /var/tmp/* /usr/share/man /usr/share/doc /usr/share/info /app.jar
+RUN addgroup -S tega && adduser -S tega -G tega
 USER tega
 EXPOSE 8082
 ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher"]

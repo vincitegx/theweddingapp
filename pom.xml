@@ -14,9 +14,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <spring.boot.dependencies.version>3.0.4</spring.boot.dependencies.version>
-        <spring.cloud-version>2022.0.1</spring.cloud-version>
-        <spring.boot.maven.plugin.version>3.0.4</spring.boot.maven.plugin.version>
+        <spring.boot.dependencies.version>3.0.6</spring.boot.dependencies.version>
+        <spring.cloud-version>2022.0.2</spring.cloud-version>
+        <spring.boot.maven.plugin.version>3.0.6</spring.boot.maven.plugin.version>
+        <micrometer-tracing.version>1.0.4</micrometer-tracing.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -34,29 +35,24 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-tracing-bom</artifactId>
+                <version>${micrometer-tracing.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>
-        <!--        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-exporter-zipkin</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.zipkin.reporter2</groupId>
-            <artifactId>zipkin-sender-urlconnection</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.zipkin.reporter2</groupId>
-            <artifactId>zipkin-reporter-brave</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.micrometer</groupId>
-            <artifactId>micrometer-tracing-reporter-wavefront</artifactId>
-        </dependency>-->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -132,16 +128,16 @@
         </plugins>
     </build>
     <modules>
+        <module>config-service</module>
         <module>discovery-service</module>
         <module>api-gateway</module>
         <module>wedding</module>
-        <module>users</module>
         <module>feed</module>
         <module>vendor</module>
         <module>mail-service</module>
         <module>file-service</module>
-        <module>config-service</module>
         <module>admin</module>
+        <module>users</module>        
     </modules>
     
     <profiles>

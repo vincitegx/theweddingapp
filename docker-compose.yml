@@ -17,7 +17,7 @@ services:
       POSTGRES_PASSWORD: dondot3056
       PGDATA: /data/postgres
     volumes:
-      - ./local-data:/var/lib/postgresql/data
+      - ./local-data-user:/var/lib/postgresql/data
       - ./config/user-data.sql:/docker-entrypoint-initdb.d/user-data.sql:ro
     ports:
       - "5432:5432"
@@ -33,7 +33,7 @@ services:
       POSTGRES_PASSWORD: dondot3056
       PGDATA: /data/postgres
     volumes:
-      - ./local-data:/var/lib/postgresql/data
+      - ./local-data-wedding:/var/lib/postgresql/data
       - ./config/wedding-data.sql:/docker-entrypoint-initdb.d/wedding-data.sql:ro
     ports:
       - "5431:5432"
@@ -57,8 +57,8 @@ services:
     restart: unless-stopped
 
   mailhog:
-      image: mailhog/mailhog
-      container_name: 'mailhog'
+      image: davidtega/mailhog
+      container_name: mailhog
       ports:
         - "1025:1025"
         - "8025:8025"
@@ -77,85 +77,13 @@ services:
       - postgres-wedding
     restart: unless-stopped
 
-  ## Eureka Server
-  discovery-service:
-    image: davidtega/discovery-service:latest
-    container_name: discovery-service
-    ports:
-      - "8761:8761"
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod
-    depends_on:
-      - zipkin
-
-  mailhog:
-      image: mailhog/mailhog
-      container_name: 'mailhog'
-      ports:
-        - "1025:1025"
-        - "8025:8025"
-
-  ## User-Service Docker Compose Config
-  user-service:
-    container_name: user-service
-    image: davidtega/weddingapp-user:latest
-    ports:
-      - "8082:8082"
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/weddingappusers
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
     volumes:
-      - ./config/role-data.sql:/docker-entrypoint-initdb.d/role-data.sql:ro
-    depends_on:
-      - postgres
-      - discovery-service
-    restart: unless-stopped
-
-  api-gateway:
-    image: davidtega/weddingapp-gateway:latest
-    container_name: api-gateway
-    ports:
-      - "8008:8008"
-    expose:
-      - "8008"
+      - ./jenkins:/var/jenkins_home
     environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY= TRACE
-    depends_on:
-      - discovery-service
-
-  mail-service:
-    image: davidtega/weddingapp-mail:latest
-    container_name: mail-service
+      JENKINS_HOST_HOME: "/jenkins"
     ports:
-      - "9091:9091"
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod
-    depends_on:
-      - zookeeper
-      - broker
-      - discovery-service
-      - mailhog
-
-  prometheus:
-    image: prom/prometheus:v2.37.1
-    container_name: prometheus
-    restart: unless-stopped
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-
-  grafana:
-    image: grafana/grafana-oss:8.5.2
-    container_name: grafana
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    links:
-      - prometheus:prometheus
-    volumes:
-      - ./grafana:/var/lib/grafana
-    environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - '8080:8080'
+      - '50000:50000'

@@ -1,5 +1,6 @@
 package com.slinkdigital.user.repository;
 
+import com.slinkdigital.user.defaults.AbstractTestcontainers;
 import com.slinkdigital.user.domain.EmailVerificationToken;
 import com.slinkdigital.user.domain.Users;
 import com.slinkdigital.user.domain.security.Role;
@@ -14,17 +15,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  *
  * @author TEGA
  */
-@Disabled
-@DataJpaTest(properties = {
-                "spring.jpa.properties.javax.persistence.validation.mode=none"
-        })
-public class EmailVerificationTokenRepositoryTest {
+@DataJpaTest
+@Testcontainers
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@ContextConfiguration(initializers = {AbstractTestcontainers.Initializer.class})
+public class EmailVerificationTokenRepositoryTest extends AbstractTestcontainers{
 
     @Autowired
     private EmailVerificationTokenRepository underTest;
