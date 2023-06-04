@@ -1,5 +1,6 @@
 package com.slinkdigital.user.repository;
 
+import com.slinkdigital.user.constant.OAuth2Provider;
 import com.slinkdigital.user.domain.Users;
 import com.slinkdigital.user.domain.security.Role;
 import java.time.LocalDateTime;
@@ -37,7 +38,7 @@ public class UserRepositoryTest {
         role = roleRepository.save(role);
         Set<Role> roles = new HashSet<>();
         roles.add(role);
-        Users user = new Users(null, EMAIL, "1234", LocalDateTime.now(), true, true, roles);
+        Users user = new Users(null, EMAIL, "1234", LocalDateTime.now(), true, true, roles, OAuth2Provider.LOCAL);
         underTest.save(user);
     }
 

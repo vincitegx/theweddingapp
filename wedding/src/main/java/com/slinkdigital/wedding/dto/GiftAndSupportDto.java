@@ -2,6 +2,7 @@ package com.slinkdigital.wedding.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+import com.slinkdigital.wedding.constant.GiftType;
 import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,7 +29,9 @@ public class GiftAndSupportDto {
     
     private WeddingDto wedding;
     
-    private String itemLink;
+    private GiftType giftType;
+    
+    private String sender;
     
     private String duration; 
     

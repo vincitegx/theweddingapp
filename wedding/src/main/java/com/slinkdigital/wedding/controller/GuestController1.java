@@ -6,7 +6,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -27,11 +26,5 @@ public class GuestController1 {
     @ResponseStatus(HttpStatus.CREATED)
     public GuestDto userRegistrationAsGuest(@Valid @RequestBody GuestDto guestDto) {
         return guestService.guestSelfAddition(guestDto);
-    }
-
-    @PutMapping("guests/response")
-    @ResponseStatus(HttpStatus.OK)
-    public GuestDto submitResponseToInvitation(@Valid @RequestBody GuestDto guestDto) {
-        return guestService.submitInvitationResponse(guestDto);
     }
 }

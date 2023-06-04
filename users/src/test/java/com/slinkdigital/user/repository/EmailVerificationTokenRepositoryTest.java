@@ -1,6 +1,7 @@
 package com.slinkdigital.user.repository;
 
-import com.slinkdigital.user.defaults.AbstractTestcontainers;
+import com.slinkdigital.user.config.AbstractTestcontainers;
+import com.slinkdigital.user.constant.OAuth2Provider;
 import com.slinkdigital.user.domain.EmailVerificationToken;
 import com.slinkdigital.user.domain.Users;
 import com.slinkdigital.user.domain.security.Role;
@@ -12,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.Assert.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -50,7 +50,7 @@ public class EmailVerificationTokenRepositoryTest extends AbstractTestcontainers
         role = roleRepository.save(role);
         Set<Role> roles = new HashSet<>();
         roles.add(role);
-        Users user = new Users(null, "david@gmail.com", "1234",LocalDateTime.now(), true, true, roles);                 
+        Users user = new Users(null, "david@gmail.com", "1234",LocalDateTime.now(), true, true, roles, OAuth2Provider.LOCAL);                 
         user = userRepository.save(user);
         EmailVerificationToken evt = new EmailVerificationToken(TOKEN, user, LocalDateTime.now().plusDays(1));
         underTest.save(evt);

@@ -22,7 +22,7 @@ public class GuestListener {
     private final MailService mailService;
 
     @KafkaListener(topicPattern = "msg-to-guest", groupId = "guest")
-    public void handleGuestInvitation(ConsumerRecord<String, EventDto> record) {
+    public void handleGuestMessages(ConsumerRecord<String, EventDto> record) {
         EventDto eventDto = record.value();
         Map<String, String> data = eventDto.getData();
         data.put("template", "guestMessageTemplate");

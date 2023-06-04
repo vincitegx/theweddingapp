@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -69,6 +70,12 @@ public class UserController2 {
         return authService.login(loginRequest);
     }
 
+//    @PostMapping("/oauth2/callback")
+//    public void handleOAuth2Authentication(@RequestBody OAuth2Authentication auth) {
+//        Authentication userAuthentication = auth.getUserAuthentication();
+//        String username = userAuthentication.getName();
+//    }
+    
     @PostMapping("refresh/token")
     @ResponseStatus(HttpStatus.OK)
     public JwtAuthResponse refreshToken(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) {

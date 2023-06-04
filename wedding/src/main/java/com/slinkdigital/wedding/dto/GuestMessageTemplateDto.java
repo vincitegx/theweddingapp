@@ -27,5 +27,6 @@ public class GuestMessageTemplateDto {
     
     private String content;
     
+    // link here is the google link that directs the person to where the ui of the message is eg wedding invitation template ui
     private String link;
 }

@@ -1,6 +1,6 @@
 package com.slinkdigital.user.repository;
 
-import com.slinkdigital.user.defaults.AbstractTestcontainers;
+import com.slinkdigital.user.config.AbstractTestcontainers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
 import com.slinkdigital.user.domain.security.Role;

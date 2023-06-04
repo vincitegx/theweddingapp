@@ -109,6 +109,11 @@
             <version>4.0.1</version>
         </dependency>
         <dependency>
+            <groupId>com.stripe</groupId>
+            <artifactId>stripe-java</artifactId>
+            <version>22.19.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <!--            <artifactId>kotlin-stdlib-jdk8</artifactId>-->
             <artifactId>kotlin-stdlib</artifactId>
@@ -128,7 +133,7 @@
             <artifactId>micrometer-registry-prometheus</artifactId>
             <scope>runtime</scope>
         </dependency>
-<!--                <dependency>
+        <!--                <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
         </dependency>-->

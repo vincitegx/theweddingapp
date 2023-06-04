@@ -1,5 +1,6 @@
 package com.slinkdigital.user.mapper;
 
+import com.slinkdigital.user.constant.OAuth2Provider;
 import com.slinkdigital.user.domain.Users;
 import com.slinkdigital.user.dto.RegisterRequest;
 import java.time.LocalDateTime;
@@ -28,6 +29,7 @@ public class UserRegistrationMapper implements Function<RegisterRequest, Users> 
                 .enabled(false)
                 .nonLocked(false)
                 .roles(new HashSet<>())
+                .provider(OAuth2Provider.LOCAL)
                 .build();
     }
 }

@@ -137,4 +137,7 @@ public class VendorController {
                         .build()
         );
     }
+    
+    // Use vendor in wedding, show all vendors sort them by category order by rating, add vendor to wishlist, order vendor item
+    // vendor add post
 }

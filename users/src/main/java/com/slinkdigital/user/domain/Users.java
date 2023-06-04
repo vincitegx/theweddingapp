@@ -1,5 +1,6 @@
 package com.slinkdigital.user.domain;
 
+import com.slinkdigital.user.constant.OAuth2Provider;
 import com.slinkdigital.user.domain.security.Role;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -46,4 +47,9 @@ public class Users implements Serializable {
     @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinTable(name="users_role", joinColumns = @JoinColumn(name = "user_id"),inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private OAuth2Provider provider;
+
 }

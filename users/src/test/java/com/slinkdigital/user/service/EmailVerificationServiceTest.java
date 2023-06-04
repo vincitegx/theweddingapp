@@ -24,7 +24,6 @@ import java.util.Set;
 import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -42,8 +41,6 @@ import org.springframework.kafka.core.KafkaTemplate;
  *
  * @author TEGA
  */
-@Disabled
-@SuppressWarnings("unused")
 @ExtendWith(MockitoExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class EmailVerificationServiceTest {

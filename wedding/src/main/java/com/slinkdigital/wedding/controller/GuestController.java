@@ -2,10 +2,8 @@ package com.slinkdigital.wedding.controller;
 
 import com.slinkdigital.wedding.dto.GuestDto;
 import com.slinkdigital.wedding.dto.GuestSettingDto;
-import com.slinkdigital.wedding.dto.MessageGuestDto;
 import com.slinkdigital.wedding.service.GuestService;
 import com.slinkdigital.wedding.service.GuestSettingService;
-import java.util.Map;
 import java.util.Optional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -75,21 +73,9 @@ public class GuestController {
         return guestService.changeGuestStatus(guestDto);
     }
     
-    @DeleteMapping("guest")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeGuest(@Valid @RequestBody GuestDto guestDto){
-        guestService.removeGuest(guestDto);
-    }
-    
     @DeleteMapping("guests")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeGuests(@Valid @RequestBody List<GuestDto> guestDto){
         guestService.removeGuests(guestDto);
     }
-    
-    @PostMapping("guests/invitation")
-    @ResponseStatus(HttpStatus.OK)
-    public Map<String, String> sendInvitationToGuests(@Valid @RequestBody MessageGuestDto messageGuestDto){
-        return guestService.sendInvitationToGuests(messageGuestDto);
-    }    
 }

@@ -3,6 +3,7 @@ package com.slinkdigital.wedding.service;
 import com.slinkdigital.wedding.domain.GiftAndSupport;
 import com.slinkdigital.wedding.domain.Wedding;
 import com.slinkdigital.wedding.dto.GiftAndSupportDto;
+import com.slinkdigital.wedding.dto.PaymentRequest;
 import com.slinkdigital.wedding.exception.WeddingException;
 import com.slinkdigital.wedding.mapper.GSMapper;
 import com.slinkdigital.wedding.repository.GiftAndSupportRepository;
@@ -23,6 +24,7 @@ public class GiftAndSupportService {
     private final GiftAndSupportRepository giftAndSupportRepository;
     private final WeddingRepository weddingRepository;
     private final GSMapper gsm;
+    private final PaymentService paymentService;
 
     public List<GiftAndSupportDto> getAllGiftAndSupportForWedding(Long id) {
         Wedding wedding = weddingRepository.findById(id).orElseThrow(() -> new WeddingException("No Such Wedding"));
@@ -34,8 +36,9 @@ public class GiftAndSupportService {
         return giftAndSupportDtos;
     }
 
-    public GiftAndSupportDto add(GiftAndSupportDto giftAndSupportDto) {
-        GiftAndSupport giftAndSupport = gsm.mapDtoToGiftAndSupport(giftAndSupportDto);
+    public GiftAndSupportDto sendMoney(PaymentRequest paymentRequest) {
+        GiftAndSupport giftAndSupport = gsm.mapDtoToGiftAndSupport(paymentRequest.getGiftAndSupportDto());
+        paymentService.chargeCard(paymentRequest);
         giftAndSupport = giftAndSupportRepository.save(giftAndSupport);
         return gsm.mapGiftAndSupportToDto(giftAndSupport);
     }

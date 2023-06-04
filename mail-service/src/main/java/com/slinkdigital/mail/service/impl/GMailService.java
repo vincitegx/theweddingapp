@@ -49,7 +49,6 @@ import org.springframework.messaging.MessagingException;
  */
 @Service
 @RequiredArgsConstructor
-@Builder
 @Profile("prod")
 public class GMailService{
 
@@ -59,7 +58,7 @@ public class GMailService{
         NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
         GsonFactory jsonFactory = GsonFactory.getDefaultInstance();
         service = new Gmail.Builder(httpTransport, jsonFactory, getCredentials(httpTransport, jsonFactory))
-                .setApplicationName("Test Mailer")
+                .setApplicationName("Wedding App")
                 .build();
     }
 

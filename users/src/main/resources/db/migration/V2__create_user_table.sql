@@ -8,5 +8,6 @@ CREATE  TABLE users (
 	email                varchar(255)  NOT NULL UNIQUE ,
 	enabled              boolean  NOT NULL  ,
 	non_locked           boolean  NOT NULL  ,
-	password             varchar(255)  NOT NULL
+	password             varchar(255)  NOT NULL  ,
+        provider             varchar(255)  NOT NULL
  );

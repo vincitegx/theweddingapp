@@ -3,6 +3,7 @@
 /users/target/
 /wedding/target/
 /users/nbproject/
+/config-service/target/
 /nbproject/private/
 /nbbuild/
 /dist/
@@ -24,3 +25,5 @@ src/main/resources/*.json
 /jenkins/
 /local-data/
 /target/
+/sonar-project.properties
+/nb-configuration.xml

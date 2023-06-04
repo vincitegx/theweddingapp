@@ -1,6 +1,8 @@
 package com.slinkdigital.wedding.controller;
 
+import com.slinkdigital.wedding.constant.GiftType;
 import com.slinkdigital.wedding.dto.GiftAndSupportDto;
+import com.slinkdigital.wedding.dto.PaymentRequest;
 import com.slinkdigital.wedding.service.GiftAndSupportService;
 import java.util.List;
 import jakarta.validation.Valid;
@@ -33,10 +35,10 @@ public class GiftAndSupportController {
         return giftAndSupportService.getAllGiftAndSupportForWedding(id);
     }
 
-    @PostMapping("gs")
+    @PostMapping("gs/cash")
     @ResponseStatus(HttpStatus.CREATED)
-    public GiftAndSupportDto add(@Valid @RequestBody GiftAndSupportDto giftAndSupportDto) {
-        return giftAndSupportService.add(giftAndSupportDto);
+    public GiftAndSupportDto send(@Valid @RequestBody PaymentRequest paymentRequest) {
+        return giftAndSupportService.sendMoney(paymentRequest);        
     }
     
     @PutMapping("gs")

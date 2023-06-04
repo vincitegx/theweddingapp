@@ -2,6 +2,7 @@ package com.slinkdigital.wedding.service;
 
 import com.slinkdigital.wedding.domain.GuestMessage;
 import com.slinkdigital.wedding.domain.Wedding;
+import com.slinkdigital.wedding.dto.EventDto;
 import com.slinkdigital.wedding.dto.MessageGuestDto;
 import com.slinkdigital.wedding.dto.GuestMessageDto;
 import com.slinkdigital.wedding.exception.WeddingException;
@@ -16,6 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.slinkdigital.wedding.repository.MessageRepository;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+import org.springframework.kafka.core.KafkaTemplate;
 
 /**
  *
@@ -31,6 +35,7 @@ public class GuestMessageService {
     private final MsgToGuestMapper msgToGuestMapper;
     private final WeddingRepository weddingRepository;
     private final HttpServletRequest request;
+    private final KafkaTemplate<String, EventDto> kakfaTemplate;
 
     public List<GuestMessageDto> getMessages(Long weddingId) {
         Wedding wedding = weddingRepository.findById(weddingId).orElseThrow(() -> new WeddingException("No Such Wedding"));
@@ -115,17 +120,22 @@ public class GuestMessageService {
         } else if (!wedding.getIsPublished()) {
             throw new WeddingException("You have to publish this wedding first");
         } else {
-//                messageGuestDto.getGuestEmail().forEach(g -> {
-//                    data.put("msg", messageGuestDto.getMessage());
-//                    data.put("subject", messageGuestDto.getSubject());
-//                    EventDto eventDto = EventDto.builder().from(messageGuestDto.getAuthorEmail()).to(g).data(data).build();
-//                    kakfaTemplate.send("msg-to-guest", eventDto);
-//                });
+            String userEmail = getLoggedInUserEmail();
+                messageGuestDto.getGuests().forEach(g -> {
+                    Map<String, String> data = new HashMap<>();
+                    data.put("msg", messageGuestDto.getMessage().getContent());
+                    data.put("subject", messageGuestDto.getMessage().getTitle());
+                    EventDto eventDto = EventDto.builder().from(userEmail).to(g.getEmail()).data(data).build();
+                    kakfaTemplate.send("msg-to-guest", eventDto);
+                });
         }
     }
 
     private Long getLoggedInUserId() {
         return Long.parseLong(request.getHeader("x-id"));
     }
-
+    
+    private String getLoggedInUserEmail() {
+        return request.getHeader("x-email");
+    }
 }
