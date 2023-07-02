@@ -17,8 +17,7 @@ public class UserDtoMapper implements Function<Users, UserDto> {
     @Override
     public UserDto apply(Users user) {
         Set<String> roles = getUserRoles(user);
-        UserDto userDto = UserDto.builder().email(user.getEmail()).id(user.getId()).roles(roles).build();
-        return userDto;
+        return UserDto.builder().email(user.getEmail()).id(user.getId()).roles(roles).build();
     }
 
     private Set<String> getUserRoles(Users user) {

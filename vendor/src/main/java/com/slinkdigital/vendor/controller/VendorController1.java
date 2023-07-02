@@ -1,6 +1,7 @@
 package com.slinkdigital.vendor.controller;
 
 import com.slinkdigital.vendor.dto.ApiResponse;
+import com.slinkdigital.vendor.dto.PersonalVendorRegistrationRequest;
 import com.slinkdigital.vendor.dto.VendorDto;
 import com.slinkdigital.vendor.service.VendorService;
 import java.time.LocalDateTime;
@@ -11,12 +12,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import static org.springframework.http.HttpStatus.OK;
+
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class VendorController1 {
     
     private final VendorService vendorService;
-    
+
     @GetMapping("{id}")
     public ResponseEntity<ApiResponse> getVendorById(@PathVariable Long id){
         VendorDto vendor = vendorService.getVendorById(id);

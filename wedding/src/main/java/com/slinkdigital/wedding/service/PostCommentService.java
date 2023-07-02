@@ -55,9 +55,7 @@ public class PostCommentService {
         Post post = postRepository.findById(id).orElseThrow(() -> new WeddingException("No post associated with this id"));
         List<PostComment> postComments = postCommentRepository.findByPost(post);
         List<PostCommentDto> postCommentDtos = new ArrayList<>();
-        postComments.forEach(pc -> {
-            postCommentDtos.add(postCommentMapper.mapPostCommentToDto(pc));
-        });
+        postComments.forEach(pc -> postCommentDtos.add(postCommentMapper.mapPostCommentToDto(pc)));
         return postCommentDtos;
     }
 

@@ -1,6 +1,7 @@
 package com.slinkdigital.user.config;
 
 import com.slinkdigital.user.exception.UserException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
@@ -16,14 +17,14 @@ import org.springframework.scheduling.annotation.Scheduled;
 @Configuration
 @EnableCaching
 @EnableScheduling
+@Slf4j
 public class CacheConfig {
     
     public static final String USERDTO = "userdto";
     
     @Bean
     public CacheManager cacheManager(){
-        ConcurrentMapCacheManager cacheManager = new ConcurrentMapCacheManager(USERDTO);
-        return cacheManager;
+        return new ConcurrentMapCacheManager(USERDTO);
     }
     
     @Scheduled(fixedRate = 3599999)
@@ -31,7 +32,7 @@ public class CacheConfig {
         try{
             cacheManager().getCache(USERDTO).clear();
         }catch(NullPointerException ex){
-            throw new UserException(ex.getMessage());
+            log.error(ex.getLocalizedMessage());
         }
     }    
 }

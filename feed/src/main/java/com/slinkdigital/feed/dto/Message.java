@@ -11,6 +11,6 @@ import lombok.Data;
 @AllArgsConstructor
 public class Message {
     private String type;
-    private String message;
+    private String msg;
 }
 

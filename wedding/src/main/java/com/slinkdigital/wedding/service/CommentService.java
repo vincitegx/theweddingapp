@@ -32,9 +32,7 @@ public class CommentService {
             Wedding wedding = weddingRepository.findById(id).orElseThrow(() -> new WeddingException("No wedding associated with this id"));
             List<Comment> comments = commentRepository.findByWedding(wedding);
             List<CommentDto> commentDtos = new ArrayList<>();
-            comments.forEach(comment -> {
-                commentDtos.add(commentMapper.mapCommentToDto(comment));
-            });
+            comments.forEach(comment -> commentDtos.add(commentMapper.mapCommentToDto(comment)));
             return commentDtos;
         } catch (RuntimeException ex) {
             throw new WeddingException(ex.getMessage());

@@ -17,7 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
  * @author TEGA
  */
 @ExtendWith(MockitoExtension.class)
-public class LoginAttemptServiceTest {
+class LoginAttemptServiceTest {
 
     private static final int MAXIMUM_NUMBER_OF_ATTEMPTS = 5;
     private static final int ATTEMPT_INCREMENT = 1;
@@ -43,9 +43,9 @@ public class LoginAttemptServiceTest {
     }
     
     @Test
-    public void testEvictUserFromLoginAttemptCache() throws ExecutionException {
+    void testEvictUserFromLoginAttemptCache() throws ExecutionException {
         underTest.evictUserFromLoginAttemptCache(USERNAME);
-        assertThat(loginAttemptCache.get(USERNAME)).isEqualTo(0);
+        assertThat(loginAttemptCache.get(USERNAME)).isZero();
     }
 
     /**
@@ -53,7 +53,7 @@ public class LoginAttemptServiceTest {
      * @throws java.util.concurrent.ExecutionException
      */
     @Test
-    public void testAddUserToLoginAttemptCache() throws ExecutionException {
+    void testAddUserToLoginAttemptCache() throws ExecutionException {
         int attempts = ATTEMPT_INCREMENT + loginAttemptCache.get(USERNAME);
         loginAttemptCache.put(USERNAME, attempts);
         assertThat(loginAttemptCache.get(USERNAME)).isEqualTo(1);
@@ -65,7 +65,7 @@ public class LoginAttemptServiceTest {
      */
     @Test
     @Disabled
-    public void testHasExceededMaxAttempts() throws ExecutionException {
+    void testHasExceededMaxAttempts() throws ExecutionException {
         assertThat(loginAttemptCache.get(USERNAME)).isGreaterThanOrEqualTo(MAXIMUM_NUMBER_OF_ATTEMPTS);
     }    
 }

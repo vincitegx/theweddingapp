@@ -12,6 +12,7 @@ import com.slinkdigital.user.repository.EmailVerificationTokenRepository;
 import com.slinkdigital.user.repository.UserRepository;
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -45,9 +46,7 @@ public class EmailVerificationService {
     public String registerVerificationTokenToDb(UserDto userDto) {
         String generatedToken = UUID.randomUUID().toString();
         Users user = Users.builder().id(userDto.getId()).email(userDto.getEmail()).build();
-        emailVerificationTokenRepository.findByUser(user).ifPresent(token -> {
-            emailVerificationTokenRepository.delete(token);
-        });
+        emailVerificationTokenRepository.findByUser(user).ifPresent(token -> emailVerificationTokenRepository.delete(token));
         EmailVerificationToken verificationToken = new EmailVerificationToken(generatedToken, user, LocalDateTime.now().plusHours(activationTokenExpirationTimeInHours));
         emailVerificationTokenRepository.save(verificationToken);
         Map<String, String> data = new HashMap<>();
@@ -67,7 +66,7 @@ public class EmailVerificationService {
     public Users verifyEmail(String token) {
         EmailVerificationToken verificationToken = emailVerificationTokenRepository.findByToken(token).orElseThrow(() -> new UserException("Token does not exist !!!"));
         if (verificationToken.getExpiresAt().isBefore(LocalDateTime.now(clock))) {
-            throw new TokenExpiredException("Token Expired !!!");
+            throw new TokenExpiredException("Token Expired !!!", verificationToken.getExpiresAt().toInstant(ZoneOffset.UTC));
         } else {
             Users user = verificationToken.getUser();
             user.setEnabled(true);

@@ -27,3 +27,8 @@ src/main/resources/*.json
 /target/
 /sonar-project.properties
 /nb-configuration.xml
+.idea
+*.iws
+*.iml
+*.ipr
+/.idea/

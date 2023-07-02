@@ -23,10 +23,12 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 
 /**
  *
@@ -69,12 +71,6 @@ public class UserController2 {
     public JwtAuthResponse userLogin(@Valid @RequestBody LoginRequest loginRequest) {
         return authService.login(loginRequest);
     }
-
-//    @PostMapping("/oauth2/callback")
-//    public void handleOAuth2Authentication(@RequestBody OAuth2Authentication auth) {
-//        Authentication userAuthentication = auth.getUserAuthentication();
-//        String username = userAuthentication.getName();
-//    }
     
     @PostMapping("refresh/token")
     @ResponseStatus(HttpStatus.OK)
@@ -88,6 +84,15 @@ public class UserController2 {
         log.info("Trying to validate token {}", token);
         return authService.validateToken(token);
     }
+
+//    @PostMapping("oauth2/validate")
+//    @ResponseStatus(HttpStatus.OK)
+//    public UserDto validateOAuth2Token(@RequestParam String token) throws GeneralSecurityException, IOException {
+//        log.info("Trying to validate OAuth2token {}", token);
+//        UserDto userDto =authService.validateOAuth2Token(token);
+//        log.info(userDto.toString());
+//        return userDto;
+//    }
 
     @PostMapping("forget-password/generate-token")
     @ResponseStatus(HttpStatus.CREATED)

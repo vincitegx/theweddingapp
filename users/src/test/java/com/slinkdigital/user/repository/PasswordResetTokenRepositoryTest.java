@@ -21,7 +21,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 @DataJpaTest(properties = {
     "spring.jpa.properties.javax.persistence.validation.mode=none"
 })
-public class PasswordResetTokenRepositoryTest {
+class PasswordResetTokenRepositoryTest {
     
     @Autowired
     private PasswordResetTokenRepository underTest;
@@ -49,7 +49,7 @@ public class PasswordResetTokenRepositoryTest {
      */
     @ParameterizedTest
     @CsvSource("1234")
-    public void testFindByResetToken(String given) {
+    void testFindByResetToken(String given) {
         Optional<PasswordResetToken> passwordResetToken = underTest.findByResetToken(given);
         assertThat(passwordResetToken).isNotEmpty();
     }

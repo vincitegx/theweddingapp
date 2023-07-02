@@ -22,15 +22,15 @@ public class GuestListener {
     private final MailService mailService;
 
     @KafkaListener(topicPattern = "msg-to-guest", groupId = "guest")
-    public void handleGuestMessages(ConsumerRecord<String, EventDto> record) {
-        EventDto eventDto = record.value();
+    public void handleGuestMessages(ConsumerRecord<String, EventDto> consumerRecord) {
+        EventDto eventDto = consumerRecord.value();
         Map<String, String> data = eventDto.getData();
         data.put("template", "guestMessageTemplate");
         eventDto.setData(data);
 
-        log.info("Email To Guest Request recieved: " + record.toString());
+        log.info("Email To Guest Request recieved: " + consumerRecord.toString());
         if (eventDto.getFrom() == null) {
-            log.warn("Ignoring request to send an e-mail without e-mail address: " + record.toString());
+            log.warn("Ignoring request to send an e-mail without e-mail address: " + consumerRecord.toString());
             return;
         }
         try {

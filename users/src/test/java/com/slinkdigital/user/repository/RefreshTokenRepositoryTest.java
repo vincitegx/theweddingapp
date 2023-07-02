@@ -25,7 +25,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 @DataJpaTest(properties = {
     "spring.jpa.properties.javax.persistence.validation.mode=none"
 })
-public class RefreshTokenRepositoryTest {
+class RefreshTokenRepositoryTest {
     
     @Autowired
     private UserRepository userRepository;
@@ -60,7 +60,7 @@ public class RefreshTokenRepositoryTest {
      */
     @Test
     @DisplayName("Find Refresh Token Object By token")
-    public void testFindByToken() {
+    void testFindByToken() {
         Optional<RefreshToken> refreshToken = underTest.findByToken(TOKEN);
         assertThat(refreshToken).isPresent();
     }
@@ -69,7 +69,7 @@ public class RefreshTokenRepositoryTest {
      * Test of deleteByToken method, of class RefreshTokenRepository.
      */
     @Test
-    public void testDeleteByToken() {
+    void testDeleteByToken() {
         underTest.deleteByToken(TOKEN);
         assertThat(underTest.findByToken(TOKEN)).isEmpty();
     }

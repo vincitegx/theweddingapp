@@ -19,7 +19,6 @@ import com.slinkdigital.user.repository.UserRepository;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -43,15 +42,13 @@ public class UserDetailsServiceImpl implements UserDetailsService{
         } catch (ExecutionException ex) {
             Logger.getLogger(UserDetailsServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return mapUserToCustomUserDetails(user, (List<SimpleGrantedAuthority>) getAuthorities(user));
-//        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), user.getEnabled(), true, true, user.getNonLocked(), getAuthorities(user));
+//        return mapUserToCustomUserDetails(user, (List<SimpleGrantedAuthority>) getAuthorities(user));
+        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), user.getEnabled(), true, true, user.getNonLocked(), getAuthorities(user));
     }
     private Collection<? extends GrantedAuthority> getAuthorities(Users user) {
         Set<Role> roles = user.getRoles();
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        roles.forEach((role) -> {
-            authorities.add(new SimpleGrantedAuthority(role.getName()));
-        });
+        roles.forEach(role -> authorities.add(new SimpleGrantedAuthority(role.getName())));
         return authorities;
     }
     

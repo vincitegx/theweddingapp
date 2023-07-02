@@ -30,9 +30,7 @@ public class GiftAndSupportService {
         Wedding wedding = weddingRepository.findById(id).orElseThrow(() -> new WeddingException("No Such Wedding"));
         List<GiftAndSupport> giftAndSupports = giftAndSupportRepository.findByWedding(wedding);
         List<GiftAndSupportDto> giftAndSupportDtos = new ArrayList<>();
-        giftAndSupports.forEach(gs -> {
-            giftAndSupportDtos.add(gsm.mapGiftAndSupportToDto(gs));
-        });
+        giftAndSupports.forEach(gs -> giftAndSupportDtos.add(gsm.mapGiftAndSupportToDto(gs)));
         return giftAndSupportDtos;
     }
 

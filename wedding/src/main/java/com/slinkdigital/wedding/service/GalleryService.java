@@ -29,17 +29,21 @@ public class GalleryService {
     private final WeddingRepository weddingRepository;
     private final HttpServletRequest request;
     private final FileService fileService;
+    private static final String WEDDING_NOT_PUBLISHED = "You have to publish this wedding first";
+    private static final String AUTHORIZATION_ERROR = "Cannot Identify The User, Therefore operation cannot be performed";
+    private static final String WEDDING_NOT_FOUND = "No Such Wedding";
+    private static final String PHOTO_UPLOAD_LIMIT_MSG = "Sorry you can only have a maximum of four photos";
 
     public List<PhotoDto> addPreWeddingPhotos(Long id, List<MultipartFile> gallery) {
-        Wedding wedding = weddingRepository.findById(id).orElseThrow(() -> new WeddingException("No Such Wedding"));
+        Wedding wedding = weddingRepository.findById(id).orElseThrow(() -> new WeddingException(WEDDING_NOT_FOUND));
         Long loggedInUser = getLoggedInUserId();
         if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
-            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+            throw new WeddingException(AUTHORIZATION_ERROR);
         } else {
             Gallery g = galleryRepository.findByWedding(wedding).orElse(new Gallery());
             List<Photo> initialPreWeddingPhotoUrls = g.getPreWeddingPhotos();
             if (initialPreWeddingPhotoUrls.size() > 4 || initialPreWeddingPhotoUrls.size() + gallery.size() > 4) {
-                throw new WeddingException("Sorry you can only have a maximum of four photos");
+                throw new WeddingException(PHOTO_UPLOAD_LIMIT_MSG);
             } else {
                 List<String> preWeddingPhotoUrls = fileService.uploadFiles(gallery);
                 List<Photo> newPreWeddingPhotos = new ArrayList<>();
@@ -53,24 +57,23 @@ public class GalleryService {
                 });
                 g.setPreWeddingPhotos(initialPreWeddingPhotoUrls);
                 galleryRepository.saveAndFlush(g);
-                List<PhotoDto> photoDtos = initialPreWeddingPhotoUrls.stream().map(photo -> {
+                return initialPreWeddingPhotoUrls.stream().map(photo -> {
                     return new PhotoDto(photo.getId(), photo.getName());
                 }).collect(Collectors.toList());
-                return photoDtos;
             }
         }
     }
 
     public List<PhotoDto> addWeddingPhotos(Long id, List<MultipartFile> gallery) {
-        Wedding wedding = weddingRepository.findById(id).orElseThrow(() -> new WeddingException("No Such Wedding"));
+        Wedding wedding = weddingRepository.findById(id).orElseThrow(() -> new WeddingException(WEDDING_NOT_FOUND));
         Long loggedInUser = getLoggedInUserId();
         if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
-            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+            throw new WeddingException(AUTHORIZATION_ERROR);
         } else {
             Gallery g = galleryRepository.findByWedding(wedding).orElse(new Gallery());
             List<Photo> initialWeddingPhotoUrls = g.getWeddingPhotos();
             if (initialWeddingPhotoUrls.size() > 4 || initialWeddingPhotoUrls.size() + gallery.size() > 4) {
-                throw new WeddingException("Sorry you can only have a maximum of four photos");
+                throw new WeddingException(PHOTO_UPLOAD_LIMIT_MSG);
             } else {
                 List<String> weddingPhotoUrls = fileService.uploadFiles(gallery);
                 List<Photo> newWeddingPhotos = new ArrayList<>();
@@ -93,15 +96,15 @@ public class GalleryService {
     }
 
     public List<PhotoDto> addPostWeddingPhotos(Long id, List<MultipartFile> gallery) {
-        Wedding wedding = weddingRepository.findById(id).orElseThrow(() -> new WeddingException("No Such Wedding"));
+        Wedding wedding = weddingRepository.findById(id).orElseThrow(() -> new WeddingException(WEDDING_NOT_FOUND));
         Long loggedInUser = getLoggedInUserId();
         if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
-            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+            throw new WeddingException(AUTHORIZATION_ERROR);
         } else {
             Gallery g = galleryRepository.findByWedding(wedding).orElse(new Gallery());
             List<Photo> initialPostWeddingPhotoUrls = g.getPostWeddingPhotos();
             if (initialPostWeddingPhotoUrls.size() > 4 || initialPostWeddingPhotoUrls.size() + gallery.size() > 4) {
-                throw new WeddingException("Sorry you can only have a maximum of four photos");
+                throw new WeddingException(PHOTO_UPLOAD_LIMIT_MSG);
             } else {
                 List<String> postWeddingPhotoUrls = fileService.uploadFiles(gallery);
                 List<Photo> newPostWeddingPhotos = new ArrayList<>();

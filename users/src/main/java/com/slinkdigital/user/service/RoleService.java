@@ -40,7 +40,7 @@ public class RoleService {
 
     public void addRoleCouple(List<Long> couple) {
         Role role = roleRepository.findByName(DefaultRoles.ROLE_COUPLE);
-        couple.forEach((c) -> {
+        couple.forEach(c -> {
             Users user = userRepository.findById(c).orElseThrow(() -> new UserException("No user associated with this id:" + c));
             user.getRoles().add(role);
             userRepository.save(user);

@@ -1,19 +1,15 @@
 package com.slinkdigital.vendor.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import com.slinkdigital.vendor.constant.VendorOwnerIdentity;
 import com.slinkdigital.vendor.domain.VendorCategory;
 import java.util.List;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 
 /**
  *
@@ -23,19 +19,15 @@ import org.springframework.context.annotation.Scope;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@JsonInclude(NON_NULL)
-@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class PersonalVendorRegistrationRequest {
-    
     private Long userId;
-    
     @Enumerated(EnumType.STRING)
     private VendorOwnerIdentity vendorOwnerIdentity;
-    
-    @ManyToMany
+    @OneToMany
     private List<VendorCategory> category;
-    
-    private String fullName;
-    
+    private String name;
     private String address;
+    private String description;
+    private String phoneNumber;
+    private String identityImageUrl;
 }

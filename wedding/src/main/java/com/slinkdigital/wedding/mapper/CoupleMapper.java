@@ -22,8 +22,7 @@ public class CoupleMapper {
     public CoupleDto getJson(String coupleDto) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            CoupleDto coupleJson = objectMapper.readValue(coupleDto, CoupleDto.class);
-            return coupleJson;
+            return objectMapper.readValue(coupleDto, CoupleDto.class);
         } catch (IOException ex) {
             throw new WeddingException(ex.getMessage());
         }

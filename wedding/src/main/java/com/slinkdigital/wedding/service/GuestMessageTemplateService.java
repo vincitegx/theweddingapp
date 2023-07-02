@@ -30,13 +30,12 @@ public class GuestMessageTemplateService {
     private final WeddingMapper weddingMapper;
     private final HttpServletRequest request;
     private final GuestMessageService guestMessageService;
+    private static final String GUEST_TEMPLATE_NOT_FOUND = "No Such Guest Message Template With ID ";
 
     public List<GuestMessageTemplateDto> getAllTemplates() {
         List<GuestMessageTemplate> guestMessageTemplate = guestMessageTemplateRepository.findAll();
         List<GuestMessageTemplateDto> guestMessageTemplateDto = new ArrayList<>();
-        guestMessageTemplate.forEach(gmt -> {
-            guestMessageTemplateDto.add(guestMessageTemplateMapper.mapToDto(gmt));
-        });
+        guestMessageTemplate.forEach(gmt -> guestMessageTemplateDto.add(guestMessageTemplateMapper.mapToDto(gmt)));
         return guestMessageTemplateDto;
     }
 
@@ -47,7 +46,7 @@ public class GuestMessageTemplateService {
     }
 
     public GuestMessageTemplateDto editTemplate(GuestMessageTemplateDto guestMessageTemplateDto) {
-        GuestMessageTemplate guestMessageTemplate = guestMessageTemplateRepository.findById(guestMessageTemplateDto.getId()).orElseThrow(() -> new WeddingException("No Such Guest Message Template With ID " + guestMessageTemplateDto.getId().toString()));
+        GuestMessageTemplate guestMessageTemplate = guestMessageTemplateRepository.findById(guestMessageTemplateDto.getId()).orElseThrow(() -> new WeddingException(GUEST_TEMPLATE_NOT_FOUND + guestMessageTemplateDto.getId().toString()));
         guestMessageTemplate.setContent(guestMessageTemplateDto.getContent());
         guestMessageTemplate.setTitle(guestMessageTemplateDto.getTitle());
         guestMessageTemplate = guestMessageTemplateRepository.save(guestMessageTemplate);
@@ -55,12 +54,12 @@ public class GuestMessageTemplateService {
     }
 
     public void deleteTemplate(Long id) {
-        GuestMessageTemplate guestMessageTemplate = guestMessageTemplateRepository.findById(id).orElseThrow(() -> new WeddingException("No Such Guest Message Template With ID " + id.toString()));
+        GuestMessageTemplate guestMessageTemplate = guestMessageTemplateRepository.findById(id).orElseThrow(() -> new WeddingException(GUEST_TEMPLATE_NOT_FOUND + id.toString()));
         guestMessageTemplateRepository.delete(guestMessageTemplate);
     }
 
     public GuestMessageTemplateDto getTemplate(Long id) {
-        GuestMessageTemplate guestMessageTemplate = guestMessageTemplateRepository.findById(id).orElseThrow(() -> new WeddingException("No Such Guest Message Template With ID " + id.toString()));
+        GuestMessageTemplate guestMessageTemplate = guestMessageTemplateRepository.findById(id).orElseThrow(() -> new WeddingException(GUEST_TEMPLATE_NOT_FOUND + id.toString()));
         return guestMessageTemplateMapper.mapToDto(guestMessageTemplate);
     }
 

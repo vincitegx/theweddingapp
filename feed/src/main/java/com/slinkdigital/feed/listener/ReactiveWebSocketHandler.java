@@ -28,10 +28,10 @@ public class ReactiveWebSocketHandler implements WebSocketHandler {
     @Override
     public Mono<Void> handle(WebSocketSession webSocketSession) {
         return webSocketSession.send(kafkaService.getTestTopicFlux()
-                .map(record -> {
-                    Message message = new Message("[Test] Add message", record.value());
-                    log.info(message.getMessage());
-                    log.info(record.value());
+                .map(receiverRecord -> {
+                    Message message = new Message("[Test] Add message", receiverRecord.value());
+                    log.info(message.getMsg());
+                    log.info(receiverRecord.value());
                     try {
                         return json.writeValueAsString(message);
                     } catch (JsonProcessingException e) {

@@ -26,14 +26,16 @@ public class PostReactionService {
     private final PostReactionRepository postReactionRepository;
     private final PostReactionMapper postReactionMapper;
     private final PostRepository postRepository;
+    private static final String REACTION_NOT_FOUND ="No such reaction";
+
 
     public void removePostReaction(Long id) {
-        PostReaction postReaction = postReactionRepository.findById(id).orElseThrow(() -> new WeddingException("No such reaction"));
+        PostReaction postReaction = postReactionRepository.findById(id).orElseThrow(() -> new WeddingException(REACTION_NOT_FOUND));
         postReactionRepository.delete(postReaction);
     }
 
     public PostReactionDto editPostReaction(PostReactionDto postReactionDto) {
-        PostReaction postReaction = postReactionRepository.findById(postReactionDto.getId()).orElseThrow(() -> new WeddingException("No such reaction"));
+        PostReaction postReaction = postReactionRepository.findById(postReactionDto.getId()).orElseThrow(() -> new WeddingException(REACTION_NOT_FOUND));
         postReaction.setType(postReactionDto.getType());
         postReaction = postReactionRepository.saveAndFlush(postReaction);
         return postReactionMapper.mapReactionToDto(postReaction);
@@ -48,7 +50,7 @@ public class PostReactionService {
     }
 
     public PostReactionDto getPostReaction(Long id) {
-        PostReaction postReaction = postReactionRepository.findById(id).orElseThrow(() -> new WeddingException("No such reaction"));
+        PostReaction postReaction = postReactionRepository.findById(id).orElseThrow(() -> new WeddingException(REACTION_NOT_FOUND));
         return postReactionMapper.mapReactionToDto(postReaction);
     }
 
@@ -56,9 +58,7 @@ public class PostReactionService {
         Post post = postRepository.findById(id).orElseThrow(() -> new WeddingException("No post associated with this id"));
         List<PostReaction> postReactions = postReactionRepository.findByPost(post);
         List<PostReactionDto> postReactionDtos = new ArrayList<>();
-        postReactions.forEach(pr -> {
-            postReactionDtos.add(postReactionMapper.mapReactionToDto(pr));
-        });
+        postReactions.forEach(pr -> postReactionDtos.add(postReactionMapper.mapReactionToDto(pr)));
         return postReactionDtos;
     }
 }

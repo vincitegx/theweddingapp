@@ -2,10 +2,10 @@ package com.slinkdigital.vendor.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
+import com.slinkdigital.vendor.constant.VendorOwnerIdentity;
 import com.slinkdigital.vendor.constant.VerificationStatus;
-import com.slinkdigital.vendor.domain.Gallery;
 import com.slinkdigital.vendor.domain.VendorCategory;
-import com.slinkdigital.vendor.domain.VendorOwner;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -33,9 +33,7 @@ public class VendorDto {
     
     private String name;
     
-    private VendorCategory category;
-    
-    private Integer price;
+    private List<VendorCategory> category;
     
     private String description;
     
@@ -44,10 +42,10 @@ public class VendorDto {
     private VerificationStatus verificationStatus;
     
     private String coverImageUrl;
-    
-    private List<Gallery> gallery;
-    
+
+    private VendorOwnerIdentity vendorOwnerIdentity;
+
+    private String identityImageUrl;
+
     private LocalDateTime createdAt;
-    
-    private VendorOwner vendorOwner;
 }

@@ -22,16 +22,16 @@ public class VendorListener {
     private final MailService mailService;
 
     @KafkaListener(topics = "vendorowner-registration", groupId = "vendor")
-    public void handleGuestInvitation(ConsumerRecord<String, EventDto> record) {
-        EventDto eventDto = record.value();
+    public void handleGuestInvitation(ConsumerRecord<String, EventDto> consumerRecord) {
+        EventDto eventDto = consumerRecord.value();
         Map<String, String> data = eventDto.getData();
         data.put("subject", "Your Registeration is being processed");
         data.put("template", "vendorownerRegTemplate");
         eventDto.setData(data);
 
-        log.info("Email To Vendor Owner Reg Request recieved: " + record.toString());
+        log.info("Email To Vendor Owner Reg Request recieved: " + consumerRecord.toString());
         if (eventDto.getFrom() == null) {
-            log.warn("Ignoring request to send an e-mail without e-mail address: " + record.toString());
+            log.warn("Ignoring request to send an e-mail without e-mail address: " + consumerRecord.toString());
             return;
         }
         try {

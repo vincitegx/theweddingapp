@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.models.GroupedOpenApi;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.cloud.gateway.route.RouteDefinitionLocator;
 import org.springframework.context.annotation.Bean;
@@ -18,15 +17,8 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 public class SwaggerConfig {
     
-    @Autowired
-    private RouteDefinitionLocator locator;
-    
-    public SwaggerConfig(RouteDefinitionLocator locator) {
-        this.locator = locator;
-}
-    
     @Bean
-    public List<GroupedOpenApi> apis() {
+    public List<GroupedOpenApi> apis(RouteDefinitionLocator locator) {
         List<GroupedOpenApi> groups = new ArrayList<>();
         List<RouteDefinition> definitions = locator.getRouteDefinitions().collectList().block();
         assert definitions != null;

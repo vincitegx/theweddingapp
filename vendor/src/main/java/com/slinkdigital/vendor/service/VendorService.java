@@ -1,5 +1,6 @@
 package com.slinkdigital.vendor.service;
 
+import com.slinkdigital.vendor.dto.PersonalVendorRegistrationRequest;
 import com.slinkdigital.vendor.dto.VendorCategoryDto;
 import com.slinkdigital.vendor.dto.VendorOwnerDto;
 import com.slinkdigital.vendor.dto.VendorDto;
@@ -30,5 +31,7 @@ public interface VendorService {
     VendorDto getVendorById(Long id);
 
     List<VendorCategoryDto> getVendorCategories();
+
+    Map<String, String> registerAsPersonalVendor(PersonalVendorRegistrationRequest request, MultipartFile identityImage);
     
 }

@@ -35,33 +35,34 @@ public class BudgetItemService {
     private final WeddingRepository weddingRepository;
     private final BudgetRepository budgetRepository;
     private final WishlistService wishlistService;
+    private static final String WEDDING_NOT_PUBLISHED = "You have to publish this wedding first";
+    private static final String AUTHORIZATION_ERROR = "Cannot Identify The User, Therefore operation cannot be performed";
+    private static final String WEDDING_NOT_FOUND = "No Such Wedding";
 
     public Page<BudgetItemDto> getBudgetItems(Long budgetId, String search, Pageable pageable) {
         Budget budget = budgetRepository.findById(budgetId).orElseThrow(() -> new WeddingException("No Wedding Associated To This Id"));
-        Wedding wedding = weddingRepository.findById(budget.getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
+        Wedding wedding = weddingRepository.findById(budget.getWedding().getId()).orElseThrow(() -> new WeddingException(WEDDING_NOT_FOUND));
         Long loggedInUser = getLoggedInUserId();
         if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
-            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+            throw new WeddingException(AUTHORIZATION_ERROR);
         } else if (!wedding.getIsPublished()) {
-            throw new WeddingException("You have to publish this wedding first");
+            throw new WeddingException(WEDDING_NOT_PUBLISHED);
         } else {
             Page<BudgetItem> budgetItems = budgetItemRepository.findByBudgetAndItemContains(budget, search, pageable);
             List<BudgetItem> budgetItemList = budgetItems.toList();
             Page<BudgetItemDto> budgetItemDto = new PageImpl(budgetItemList);
-            budgetItems.forEach(budgetItem -> {
-                budgetItemDto.and(budgetItemMapper.mapBudgetItemToDto(budgetItem));
-            });
+            budgetItems.forEach(budgetItem -> budgetItemDto.and(budgetItemMapper.mapBudgetItemToDto(budgetItem)));
             return budgetItemDto;
         }
     }
 
     public BudgetItemDto addBudgetItem(BudgetItemDto budgetItemDto) {
-        Wedding wedding = weddingRepository.findById(budgetItemDto.getBudget().getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
+        Wedding wedding = weddingRepository.findById(budgetItemDto.getBudget().getWedding().getId()).orElseThrow(() -> new WeddingException(WEDDING_NOT_FOUND));
         Long loggedInUser = getLoggedInUserId();
         if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
-            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+            throw new WeddingException(AUTHORIZATION_ERROR);
         } else if (!wedding.getIsPublished()) {
-            throw new WeddingException("You have to publish this wedding first");
+            throw new WeddingException(WEDDING_NOT_PUBLISHED);
         } else {
             BudgetItem budgetItem = budgetItemMapper.mapDtoToBudgetItem(budgetItemDto);
             budgetItem = budgetItemRepository.saveAndFlush(budgetItem);
@@ -71,12 +72,12 @@ public class BudgetItemService {
 
     public BudgetItemDto editBudgetItem(BudgetItemDto budgetItemDto) {
         BudgetItem budgetItem = budgetItemRepository.findById(budgetItemDto.getId()).orElseThrow(() -> new WeddingException("No Such Item Matches Id"));
-        Wedding wedding = weddingRepository.findById(budgetItem.getBudget().getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
+        Wedding wedding = weddingRepository.findById(budgetItem.getBudget().getWedding().getId()).orElseThrow(() -> new WeddingException(WEDDING_NOT_FOUND));
         Long loggedInUser = getLoggedInUserId();
         if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
-            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+            throw new WeddingException(AUTHORIZATION_ERROR);
         } else if (!wedding.getIsPublished()) {
-            throw new WeddingException("You have to publish this wedding first");
+            throw new WeddingException(WEDDING_NOT_PUBLISHED);
         } else {
             budgetItem.setAmount(budgetItemDto.getAmount());
             budgetItem.setItem(budgetItemDto.getItem());
@@ -92,9 +93,9 @@ public class BudgetItemService {
         BudgetItem budgetItem = budgetItemRepository.findById(id).orElseThrow(() -> new WeddingException("No Item Associated To This Id"));
         Long loggedInUser = getLoggedInUserId();
         if (loggedInUser == null || (!loggedInUser.equals(budgetItem.getBudget().getWedding().getAuthorId()) && !loggedInUser.equals(budgetItem.getBudget().getWedding().getSpouseId()))) {
-            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+            throw new WeddingException(AUTHORIZATION_ERROR);
         } else if (!budgetItem.getBudget().getWedding().getIsPublished()) {
-            throw new WeddingException("You have to publish this wedding first");
+            throw new WeddingException(WEDDING_NOT_PUBLISHED);
         } else {
             budgetItemRepository.delete(budgetItem);
         }
@@ -102,15 +103,14 @@ public class BudgetItemService {
 
     public WishlistDto addToWishlist(Long budgetItemId) {
         BudgetItem budgetItem = budgetItemRepository.findById(budgetItemId).orElseThrow(() -> new WeddingException("No Item Associated To This Id"));
-        Wedding wedding = weddingRepository.findById(budgetItem.getBudget().getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
+        Wedding wedding = weddingRepository.findById(budgetItem.getBudget().getWedding().getId()).orElseThrow(() -> new WeddingException(WEDDING_NOT_FOUND));
         Long loggedInUser = getLoggedInUserId();
         if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
-            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+            throw new WeddingException(AUTHORIZATION_ERROR);
         } else if (!wedding.getIsPublished()) {
-            throw new WeddingException("You have to publish this wedding first");
+            throw new WeddingException(WEDDING_NOT_PUBLISHED);
         } else {
-            WishlistDto wishlist = wishlistService.addWishlist(budgetItemMapper.mapBudgetToWishlist(budgetItem));
-            return wishlist;
+            return wishlistService.addWishlist(budgetItemMapper.mapBudgetToWishlist(budgetItem));
         }
     }
 

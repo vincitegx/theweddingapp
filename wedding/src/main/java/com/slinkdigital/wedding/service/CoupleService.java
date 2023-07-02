@@ -53,6 +53,9 @@ public class CoupleService {
     @Value("${spouse.request.expiration.time.days}")
     private Long spouseRequestExpirationInDays;
     private final KafkaTemplate<String, EventDto> kakfaTemplate;
+    private static final String REQUEST_TOKEN_ERROR = "Invalid Request Token";
+    private static final String AUTHORIZATION_ERROR = "Cannot Identify The User, Therefore operation cannot be performed";
+    private static final String WEDDING_NOT_FOUND = "No Such Wedding";
 
     public CoupleDto findByUserId(Long userId) {
         Couple couple = coupleRepository.findByUserId(userId).orElseThrow(() -> new WeddingException("No such couple with id"));
@@ -61,9 +64,9 @@ public class CoupleService {
     }
 
     public CoupleDto addCoupleAuthorInfo(CoupleDto coupleDto, MultipartFile file) {
-        Wedding wedding = weddingRepository.findById(coupleDto.getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
+        Wedding wedding = weddingRepository.findById(coupleDto.getWedding().getId()).orElseThrow(() -> new WeddingException(WEDDING_NOT_FOUND));
         if (coupleDto.getUserId() == null ? wedding.getAuthorId() != null : !coupleDto.getUserId().equals(wedding.getAuthorId())) {
-            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+            throw new WeddingException(AUTHORIZATION_ERROR);
         } else {
             coupleDto.setWedding(weddingMapper.mapWeddingToDto(wedding));
             coupleDto.setCreatedAt(LocalDateTime.now());
@@ -80,10 +83,10 @@ public class CoupleService {
     }
 
     public CoupleDto addCoupleSpouseInfo(CoupleDto coupleDto, MultipartFile file) {
-        Wedding wedding = weddingRepository.findById(coupleDto.getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
+        Wedding wedding = weddingRepository.findById(coupleDto.getWedding().getId()).orElseThrow(() -> new WeddingException(WEDDING_NOT_FOUND));
         Long loggedInUser = getLoggedInUserId();
         if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
-            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+            throw new WeddingException(AUTHORIZATION_ERROR);
         } else {
             String imageUrl;
             try {
@@ -92,7 +95,6 @@ public class CoupleService {
             } catch (IOException ex) {
                 Logger.getLogger(CoupleService.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
             coupleDto.setWedding(weddingMapper.mapWeddingToDto(wedding));
             coupleDto.setCreatedAt(LocalDateTime.now());
             Couple c = coupleRepository.save(coupleMapper.mapCoupleDtoToCouple(coupleDto));
@@ -102,12 +104,12 @@ public class CoupleService {
 
     public void sendCoupleRequest(SpouseRequest spouseRequest) {
         String authorEmail = getLoggedInUserEmail();
-        Wedding wedding = weddingRepository.findById(spouseRequest.getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
+        Wedding wedding = weddingRepository.findById(spouseRequest.getWedding().getId()).orElseThrow(() -> new WeddingException(WEDDING_NOT_FOUND));
         Long loggedInUser = getLoggedInUserId();
         if (wedding.getSpouseId() != null) {
             throw new WeddingException("A spouse has already been set, remove spouse before setting a new one");
         } else if (wedding.getAuthorId() == null ? loggedInUser != null : !wedding.getAuthorId().equals(loggedInUser)) {
-            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+            throw new WeddingException(AUTHORIZATION_ERROR);
         } else {
             String requestToken = UUID.randomUUID().toString();
             CoupleRequest coupleRequest = CoupleRequest.builder()
@@ -133,7 +135,7 @@ public class CoupleService {
         Long loggedInUser = getLoggedInUserId();
         Optional<CoupleRequest> coupleRequest = coupleRequestRepository.findByEmailAndWedding(spouseRequest.getEmail(), wedding);
         if (wedding.getAuthorId() == null ? loggedInUser != null : !wedding.getAuthorId().equals(loggedInUser)) {
-            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+            throw new WeddingException(AUTHORIZATION_ERROR);
         } else if (coupleRequest.isEmpty()) {
             throw new WeddingException("No Such Couple Request Found");
         } else {
@@ -147,7 +149,7 @@ public class CoupleService {
         Wedding wedding = weddingRepository.findById(coupleDto.getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
         Long loggedInUser = getLoggedInUserId();
         if (wedding.getAuthorId() == null ? loggedInUser != null : !wedding.getAuthorId().equals(loggedInUser)) {
-            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+            throw new WeddingException(AUTHORIZATION_ERROR);
         } else if (coupleDto.getUserId() == null ? wedding.getSpouseId() != null : !coupleDto.getUserId().equals(wedding.getSpouseId())) {
             throw new WeddingException("Cannot Complete Request, Wrong Spouse Info !!!");
         } else {
@@ -160,10 +162,10 @@ public class CoupleService {
     }
 
     public Set<CoupleDto> getWeddingCouple(Long id) {
-        Wedding wedding = weddingRepository.findById(id).orElseThrow(() -> new WeddingException("Sorry, No Such Wedding Found !!!"));
+        Wedding wedding = weddingRepository.findById(id).orElseThrow(() -> new WeddingException(WEDDING_NOT_FOUND));
         List<Couple> coupleList = coupleRepository.findByWedding(wedding);
         Set<CoupleDto> coupleSet = new HashSet<>();
-        coupleList.forEach((couple) -> {
+        coupleList.forEach(couple -> {
             CoupleDto coupleDto = coupleMapper.mapCoupleToCoupleDto(couple);
             coupleSet.add(coupleDto);
         });
@@ -172,7 +174,7 @@ public class CoupleService {
 
     public CoupleDto viewAuthorRequest(String requestToken) {
         String spouseEmail = getLoggedInUserEmail();
-        CoupleRequest coupleRequest = coupleRequestRepository.findByRequestToken(requestToken).orElseThrow(() -> new WeddingException("Invalid Request Token"));
+        CoupleRequest coupleRequest = coupleRequestRepository.findByRequestToken(requestToken).orElseThrow(() -> new WeddingException(REQUEST_TOKEN_ERROR));
         if (LocalDateTime.now().isAfter(coupleRequest.getExpiresAt())) {
             throw new WeddingException("Sorry, cannot complete request as it no longer exists !!!");
         } else if (spouseEmail == null ? coupleRequest.getEmail() != null : !spouseEmail.equals(coupleRequest.getEmail())) {
@@ -184,9 +186,9 @@ public class CoupleService {
     }
 
     public void acceptAuthorRequest(String requestToken) {
-        CoupleRequest coupleRequest = coupleRequestRepository.findByRequestToken(requestToken).orElseThrow(() -> new WeddingException("Invalid Request Token"));
+        CoupleRequest coupleRequest = coupleRequestRepository.findByRequestToken(requestToken).orElseThrow(() -> new WeddingException(REQUEST_TOKEN_ERROR));
         if (coupleRequest.getEmail() == null ? getLoggedInUserEmail() != null : !coupleRequest.getEmail().equals(getLoggedInUserEmail())) {
-            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+            throw new WeddingException(AUTHORIZATION_ERROR);
         } else if (LocalDateTime.now().isAfter(coupleRequest.getExpiresAt())) {
             coupleRequestRepository.delete(coupleRequest);
             throw new WeddingException("Request Time has expired !!!");
@@ -219,9 +221,9 @@ public class CoupleService {
     }
 
     public void rejectAuthorRequest(String requestToken) {
-        CoupleRequest coupleRequest = coupleRequestRepository.findByRequestToken(requestToken).orElseThrow(() -> new WeddingException("Invalid Request Token"));
+        CoupleRequest coupleRequest = coupleRequestRepository.findByRequestToken(requestToken).orElseThrow(() -> new WeddingException(REQUEST_TOKEN_ERROR));
         if (coupleRequest.getEmail() == null ? getLoggedInUserEmail() != null : !coupleRequest.getEmail().equals(getLoggedInUserEmail())) {
-            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+            throw new WeddingException(AUTHORIZATION_ERROR);
         } else {
             Wedding wedding = coupleRequest.getWedding();
             wedding.setCoupleStatus(CoupleStatus.REJECTED);
@@ -261,9 +263,9 @@ public class CoupleService {
     }
 
     public CoupleDto updateCoupleAuthorImage(CoupleDto coupleDto, MultipartFile file){
-        Wedding wedding = weddingRepository.findById(coupleDto.getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
+        Wedding wedding = weddingRepository.findById(coupleDto.getWedding().getId()).orElseThrow(() -> new WeddingException(WEDDING_NOT_FOUND));
         if (coupleDto.getUserId() == null ? wedding.getSpouseId() != null : !coupleDto.getUserId().equals(wedding.getSpouseId())) {
-            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+            throw new WeddingException(AUTHORIZATION_ERROR);
         } else {
             String imageUrl;
             try {
@@ -279,9 +281,9 @@ public class CoupleService {
     }
 
     public CoupleDto updateCoupleSpouseImage(CoupleDto coupleDto, MultipartFile file) {
-        Wedding wedding = weddingRepository.findById(coupleDto.getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
+        Wedding wedding = weddingRepository.findById(coupleDto.getWedding().getId()).orElseThrow(() -> new WeddingException(WEDDING_NOT_FOUND));
         if (coupleDto.getUserId() == null ? wedding.getSpouseId() != null : !coupleDto.getUserId().equals(wedding.getSpouseId())) {
-            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+            throw new WeddingException(AUTHORIZATION_ERROR);
         } else {
             String imageUrl;
             try {

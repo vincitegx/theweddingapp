@@ -43,7 +43,7 @@ import org.springframework.kafka.core.KafkaTemplate;
  */
 @ExtendWith(MockitoExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class EmailVerificationServiceTest {
+class EmailVerificationServiceTest {
 
     @Mock
     private EmailVerificationTokenRepository emailVerificationTokenRepository;
@@ -76,7 +76,7 @@ public class EmailVerificationServiceTest {
 
     @Test
     @Order(1)
-    public void testRegisterVerificationTokenToDb() throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+    void testRegisterVerificationTokenToDb() throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
         Field field = underTest.getClass().getDeclaredField("activationTokenExpirationTimeInHours");
         field.setAccessible(true);
         field.set(underTest, 1L);
@@ -114,7 +114,7 @@ public class EmailVerificationServiceTest {
 
     @Test
     @Order(2)
-    public void requestNewVerificationToken() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException {
+    void requestNewVerificationToken() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException {
         Field field = underTest.getClass().getDeclaredField("activationTokenExpirationTimeInHours");
         field.setAccessible(true);
         field.set(underTest, 1L);
@@ -134,7 +134,7 @@ public class EmailVerificationServiceTest {
 
     @Test
     @Order(3)
-    public void willThrownWhenTryingToVerifyEmailWhenTokenDoNotExists() {
+    void willThrownWhenTryingToVerifyEmailWhenTokenDoNotExists() {
         String token = UUID.randomUUID().toString();
         assertThatThrownBy(() -> underTest.verifyEmail(token))
                 .isInstanceOf(UserException.class)
@@ -144,7 +144,7 @@ public class EmailVerificationServiceTest {
     
     @Test
     @Order(4)
-    public void verifyEmailFailsWhenTokenIsExpired() {
+    void verifyEmailFailsWhenTokenIsExpired() {
         Faker f = new Faker();
         String userEmail = f.internet().safeEmailAddress();
         String token = UUID.randomUUID().toString();
@@ -166,7 +166,7 @@ public class EmailVerificationServiceTest {
     
     @Test
     @Order(5)
-    public void verifyEmail() {
+    void verifyEmail() {
         Faker f = new Faker();
         String userEmail = f.internet().safeEmailAddress();
         String token = UUID.randomUUID().toString();

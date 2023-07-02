@@ -62,9 +62,7 @@ public class FileServiceImpl implements FileService {
     @Override
     public List<String> uploadFiles(List<MultipartFile> files, List<String> extensions) {
         List<String> filenames = new ArrayList<>();
-        files.forEach(file -> {
-            filenames.add(uploadFile(file, extensions.get(files.indexOf(file))));
-        });
+        files.forEach(file -> filenames.add(uploadFile(file, extensions.get(files.indexOf(file)))));
         return filenames;
     }
 

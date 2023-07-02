@@ -22,7 +22,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
  */
 @Disabled
 @DataJpaTest
-public class UserRepositoryTest {
+class UserRepositoryTest {
 
     @Autowired
     private UserRepository underTest;
@@ -53,7 +53,7 @@ public class UserRepositoryTest {
      */
     @Test
     @DisplayName("Test to find User by email...")
-    public void testFindByEmail() {
+    void testFindByEmail() {
         Optional<Users> result = underTest.findByEmail(EMAIL);
         assertTrue(result.isPresent());
         assertEquals(EMAIL, result.get().getEmail());

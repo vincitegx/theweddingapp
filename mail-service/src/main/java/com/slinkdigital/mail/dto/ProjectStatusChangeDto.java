@@ -15,14 +15,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ProjectStatusChangeDto {
     
-//    Long id;
-//
-//    String productName;
-//
-//    String authorEmailAddress;
-//
-//    String authorFullName;
-    
     private String to;
     private String from;
     private String subject;

@@ -23,7 +23,7 @@ public class CustomUserDetails implements OAuth2User, UserDetails{
     private String avatarUrl;
     private OAuth2Provider provider;
     private Collection<? extends GrantedAuthority> authorities;
-    private Map<String, Object> attributes;
+    private transient Map<String, Object> attributes;
 
     @Override
     public boolean isAccountNonExpired() {

@@ -34,9 +34,7 @@ public class ReactionService {
             Wedding wedding = weddingRepository.findById(id).orElseThrow(() -> new WeddingException("No Such Wedding"));
             List<Reaction> reactions = reactionRepository.findByWedding(wedding);
             List<ReactionDto> reactionDtos = new ArrayList<>();
-            reactions.forEach(reaction -> {
-                reactionDtos.add(reactionMapper.mapReactionToDto(reaction));
-            });
+            reactions.forEach(reaction -> reactionDtos.add(reactionMapper.mapReactionToDto(reaction)));
             return reactionDtos;
         } catch (WeddingException ex) {
             throw new WeddingException(ex.getMessage());
@@ -60,9 +58,7 @@ public class ReactionService {
         reactionRepository.saveAndFlush(reaction);
         List<Reaction> reactions = reactionRepository.findByWedding(reaction.getWedding());
         List<ReactionDto> reactionDtos = new ArrayList<>();
-        reactions.forEach(r -> {
-            reactionDtos.add(reactionMapper.mapReactionToDto(r));
-        });
+        reactions.forEach(r -> reactionDtos.add(reactionMapper.mapReactionToDto(r)));
         return reactionDtos;
     }
 

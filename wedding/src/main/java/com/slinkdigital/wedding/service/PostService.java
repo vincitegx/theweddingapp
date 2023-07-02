@@ -69,16 +69,13 @@ public class PostService {
         Wedding wedding = weddingRepository.findById(id).orElseThrow(() -> new WeddingException("No Such Wedding"));
         List<Post> posts = postRepository.findByWedding(wedding);
         List<PostDto> postDto = new ArrayList<>(posts.size());
-        posts.forEach(p -> {
-            postDto.add(postMapper.mapPostToDto(p));
-        });
+        posts.forEach(p -> postDto.add(postMapper.mapPostToDto(p)));
         return postDto;
     }
 
     public PostDto getPost(Long id) {
         Post post = postRepository.findById(id).orElseThrow(() -> new WeddingException("No Such Post Associated To This Id"));
-        PostDto postDto = postMapper.mapPostToDto(post);
-        return postDto;
+        return postMapper.mapPostToDto(post);
     }
 
     public PostDto convertWeddingToPost(Wedding wedding) {

@@ -29,7 +29,6 @@ public class KafkaService {
         kafkaProperties.put(ConsumerConfig.CLIENT_ID_CONFIG, "reactive-consumer");
         kafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, "feed-group");
         kafkaProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-//        kafkaProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         kafkaProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         ReceiverOptions<String, String> receiverOptions = ReceiverOptions.create(kafkaProperties);

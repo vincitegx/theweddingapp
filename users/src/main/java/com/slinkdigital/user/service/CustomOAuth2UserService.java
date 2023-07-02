@@ -1,6 +1,7 @@
 package com.slinkdigital.user.service;
 
 import com.slinkdigital.user.constant.DefaultRoles;
+import com.slinkdigital.user.constant.OAuth2Provider;
 import com.slinkdigital.user.dto.CustomUserDetails;
 import com.slinkdigital.user.domain.Users;
 import com.slinkdigital.user.domain.security.Role;
@@ -48,27 +49,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         Users user = upsertUser(customUserDetails);
         customUserDetails.setId(user.getId());
         return customUserDetails;
-        
-        
-//        String email = oAuth2User.getAttribute("email");
-//        Optional<Users> userOptional = userRepository.findByEmail(email);
-//        if (userOptional.isPresent()) {
-//            return oAuth2User;
-//        } else {
-//            Set<Role> roles = new HashSet<>();
-//            Role role = roleRepository.findByName(DefaultRoles.DEFAULT_ROLE);
-//            roles.add(role);
-//            String password = UUID.randomUUID().toString();
-//            Users user = new Users();
-//            user.setEmail(email);
-//            user.setCreatedAt(LocalDateTime.now());
-//            user.setEnabled(true);
-//            user.setNonLocked(true);
-//            user.setRoles(roles);
-//            user.setPassword(passwordEncoder.encode(password));
-//            userRepository.save(user);
-//            return oAuth2User;
-//        }
     }
     
     private Users upsertUser(CustomUserDetails customUserDetails) {
@@ -90,6 +70,29 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         } else {
             user = userOptional.get();
             user.setEmail(customUserDetails.getEmail());
+        }
+        return userRepository.saveAndFlush(user);
+    }
+
+    public Users upsertUser(String email) {
+        Optional<Users> userOptional = userRepository.findByEmail(email);
+        Users user;
+        if (userOptional.isEmpty()) {
+            Set<Role> roles = new HashSet<>();
+            Role role = roleRepository.findByName(DefaultRoles.DEFAULT_ROLE);
+            roles.add(role);
+            String password = UUID.randomUUID().toString();
+            user = new Users();
+            user.setEmail(email);
+            user.setProvider(OAuth2Provider.GOOGLE);
+            user.setCreatedAt(LocalDateTime.now());
+            user.setEnabled(true);
+            user.setNonLocked(true);
+            user.setRoles(roles);
+            user.setPassword(passwordEncoder.encode(password));
+        } else {
+            user = userOptional.get();
+            user.setEmail(email);
         }
         return userRepository.saveAndFlush(user);
     }

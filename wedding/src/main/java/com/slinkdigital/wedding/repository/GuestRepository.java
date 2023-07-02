@@ -24,7 +24,5 @@ public interface GuestRepository extends JpaRepository<Guest, Long>{
     
     Optional<Guest> findByIdAndWedding(Long id, Wedding wedding);
     
-//    Optional<Guest> findByCodeAndWedding(String code, Wedding wedding);
-    
     List<Guest> findByGuestStatus(GuestStatus guestStatus);
 }

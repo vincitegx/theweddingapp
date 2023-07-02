@@ -41,25 +41,26 @@ public class GuestService {
     private final HttpServletRequest request;
     private final WeddingMapper weddingMapper;
     private final GuestMapper guestMapper;
+    private static final String WEDDING_NOT_PUBLISHED = "You have to publish this wedding first";
+    private static final String AUTHORIZATION_ERROR = "Cannot Identify The User, Therefore operation cannot be performed";
+    private static final String WEDDING_NOT_FOUND = "No Such Wedding";
 
     public Page<GuestDto> getAllGuestsForWedding(Long id, String search, PageRequest pageRequest) {
-        Wedding w = weddingRepository.findById(id).orElseThrow(() -> new WeddingException("No such wedding associated to this id"));
+        Wedding w = weddingRepository.findById(id).orElseThrow(() -> new WeddingException(WEDDING_NOT_FOUND));
         Page<Guest> guests = guestRepository.findByWeddingAndNameContainsOrEmailContains(w, search, search, pageRequest);
         List<Guest> guestList = guests.toList();
         Page<GuestDto> guestDto = new PageImpl(guestList);
-        guests.forEach(g -> {
-            guestDto.and(guestMapper.mapGuestToGuestDto(g));
-        });
+        guests.forEach(g -> guestDto.and(guestMapper.mapGuestToGuestDto(g)));
         return guestDto;
     }
 
     public GuestDto addGuest(GuestDto guestDto) {
-        Wedding wedding = weddingRepository.findById(guestDto.getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
+        Wedding wedding = weddingRepository.findById(guestDto.getWedding().getId()).orElseThrow(() -> new WeddingException(WEDDING_NOT_FOUND));
         Long loggedInUser = getLoggedInUserId();
         if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
-            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+            throw new WeddingException(AUTHORIZATION_ERROR);
         } else if (!wedding.getIsPublished()) {
-            throw new WeddingException("You have to publish this wedding first");
+            throw new WeddingException(WEDDING_NOT_PUBLISHED);
         } else {
             guestDto.setCreatedAt(LocalDateTime.now());
             guestDto.setAvailabilityStatus(AvailabilityStatus.NO_RESPONSE);
@@ -88,12 +89,12 @@ public class GuestService {
     }
 
     public GuestDto changeGuestStatus(GuestDto guestDto) {
-        Wedding wedding = weddingRepository.findById(guestDto.getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
+        Wedding wedding = weddingRepository.findById(guestDto.getWedding().getId()).orElseThrow(() -> new WeddingException(WEDDING_NOT_FOUND));
         Long loggedInUser = getLoggedInUserId();
         if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
-            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+            throw new WeddingException(AUTHORIZATION_ERROR);
         } else if (!wedding.getIsPublished()) {
-            throw new WeddingException("You have to publish this wedding first");
+            throw new WeddingException(WEDDING_NOT_PUBLISHED);
         } else {
             Guest guest = guestRepository.findById(guestDto.getId()).orElseThrow(() -> new WeddingException("No Such Guest !!!"));
             guest.setGuestStatus(guestDto.getGuestStatus());
@@ -103,12 +104,12 @@ public class GuestService {
     }
 
     public void removeGuests(List<GuestDto> guestDto) {
-        Wedding wedding = weddingRepository.findById(guestDto.get(0).getWedding().getId()).orElseThrow(() -> new WeddingException("No Such Wedding"));
+        Wedding wedding = weddingRepository.findById(guestDto.get(0).getWedding().getId()).orElseThrow(() -> new WeddingException(WEDDING_NOT_FOUND));
         Long loggedInUser = getLoggedInUserId();
         if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
-            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+            throw new WeddingException(AUTHORIZATION_ERROR);
         } else if (!wedding.getIsPublished()) {
-            throw new WeddingException("You have to publish this wedding first");
+            throw new WeddingException(WEDDING_NOT_PUBLISHED);
         } else {
             guestDto.forEach(g -> {
                 Guest guest = guestRepository.findByIdAndWedding(g.getId(), weddingMapper.mapWeddingDtoToWedding(g.getWedding())).orElseThrow(() -> new WeddingException("No Such Guest !!!"));

@@ -34,7 +34,7 @@ public class FileServiceImpl implements FileService{
             MultipartBodyBuilder builder = new MultipartBodyBuilder();
             String fileExt = StringUtils.getFilenameExtension(file.getOriginalFilename());
             builder.part("file", new ByteArrayResource(file.getBytes())).filename(file.getName());
-            String coverImageUrl = webClientBuilder.build().post()
+            return webClientBuilder.build().post()
                     .uri("http://API-GATEWAY/api/fs/v1/files",
                             uriBuilder -> uriBuilder
                                     .queryParam("file", file)
@@ -49,7 +49,6 @@ public class FileServiceImpl implements FileService{
                     .retrieve()
                     .bodyToMono(String.class)
                     .block();
-            return coverImageUrl;
         } catch (IOException ex) {
             throw new VendorException(ex.getMessage());
         }
@@ -58,9 +57,7 @@ public class FileServiceImpl implements FileService{
     @Override
     public List<String> uploadFiles(List<MultipartFile> files) {
         List<String> imageUrls = new ArrayList<>();
-        files.forEach(f->{
-            imageUrls.add(uploadFile(f));
-        });
+        files.forEach(f->imageUrls.add(uploadFile(f)));
         return imageUrls;
     }
     

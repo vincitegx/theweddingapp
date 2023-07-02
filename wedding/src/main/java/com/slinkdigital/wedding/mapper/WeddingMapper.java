@@ -57,8 +57,7 @@ public class WeddingMapper {
     public WeddingDto getJson(String weddingDto) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            WeddingDto weddingJson = objectMapper.readValue(weddingDto, WeddingDto.class);
-            return weddingJson;
+            return objectMapper.readValue(weddingDto, WeddingDto.class);
         } catch (WeddingException | JsonProcessingException ex) {
             throw new WeddingException(ex.getMessage());
         }

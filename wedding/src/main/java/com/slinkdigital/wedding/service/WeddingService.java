@@ -46,6 +46,9 @@ public class WeddingService {
     private final FileService fileService;
     private final WeddingMapper weddingMapper;
     private final PostService postService;
+    private static final String AUTHORIZATION_ERROR = "Cannot Identify The User, Therefore operation cannot be performed";
+    private static final String WEDDING_NOT_FOUND = "No Such Wedding";
+    private static final String METHOD_NOT_SUPPORTED = "Not supported yet";
 
     public Page<WeddingDto> getAllPublishedWeddings(String weddingStatus, String title, Pageable pageable) {
         Date today = new Date();
@@ -68,8 +71,7 @@ public class WeddingService {
         List<WeddingDto> weddingDto = wedding.stream().map(w -> {
             return this.weddingMapper.mapWeddingToDto(w);
         }).collect(Collectors.toList());
-        Page<WeddingDto> weddingDtos = new PageImpl(weddingDto);
-        return weddingDtos;
+        return new PageImpl(weddingDto);
     }
 
     public Page<WeddingDto> getAllWeddings(String title, Pageable pageable) {
@@ -78,8 +80,7 @@ public class WeddingService {
         List<WeddingDto> weddingDto = wedding.stream().map(w -> {
             return this.weddingMapper.mapWeddingToDto(w);
         }).collect(Collectors.toList());
-        Page<WeddingDto> weddingDtos = new PageImpl(weddingDto);
-        return weddingDtos;
+        return new PageImpl(weddingDto);
     }
 
     public List<WeddingDto> getAllWeddingsByUser(Long userid) {
@@ -87,9 +88,7 @@ public class WeddingService {
         List<Wedding> wedding = weddingRepository.findByAuthorIdOrSpouseId(userid, userid);
         if (!wedding.isEmpty()) {
             List<Wedding> w = wedding;
-            w.forEach((result) -> {
-                weddingDtos.add(weddingMapper.mapWeddingToDto(result));
-            });
+            w.forEach(result -> weddingDtos.add(weddingMapper.mapWeddingToDto(result)));
         }
         return weddingDtos;
     }
@@ -98,19 +97,17 @@ public class WeddingService {
         String email = getLoggedInUserEmail();
         List<CoupleRequest> coupleRequest = coupleRequestRepository.findByEmail(email);
         List<WeddingDto> weddingDtos = new ArrayList<>();
-        coupleRequest.forEach(req -> {
-            weddingDtos.add(weddingMapper.mapWeddingToDto(req.getWedding()));
-        });
+        coupleRequest.forEach(req -> weddingDtos.add(weddingMapper.mapWeddingToDto(req.getWedding())));
         return weddingDtos;
     }
 
     public WeddingDto getWeddingById(Long id) {
-        Wedding wedding = weddingRepository.findById(id).orElseThrow(() -> new WeddingException("Sorry, No Such Wedding Found !!!"));
+        Wedding wedding = weddingRepository.findById(id).orElseThrow(() -> new WeddingException(WEDDING_NOT_FOUND));
         return weddingMapper.mapWeddingToDto(wedding);
     }
 
     public WeddingDto getWeddingByCode(String code) {
-        Wedding wedding = weddingRepository.findByCode(code).orElseThrow(() -> new WeddingException("Sorry, No Such Wedding Found !!!"));
+        Wedding wedding = weddingRepository.findByCode(code).orElseThrow(() -> new WeddingException(WEDDING_NOT_FOUND));
         return weddingMapper.mapWeddingToDto(wedding);
     }
 
@@ -118,7 +115,7 @@ public class WeddingService {
         if (weddingDto.getId() == null) {
             Long loggedInUser = getLoggedInUserId();
             if (loggedInUser == null ? weddingDto.getAuthorId() != null : !loggedInUser.equals(weddingDto.getAuthorId())) {
-                throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+                throw new WeddingException(AUTHORIZATION_ERROR);
             } else {
                 weddingDto.setCoupleStatus(CoupleStatus.REQUEST_NOT_SENT);
                 weddingDto.setCreatedAt(LocalDateTime.now());
@@ -147,12 +144,12 @@ public class WeddingService {
     }
 
     public WeddingDto publishWedding(Long id) {
-        Wedding wedding = weddingRepository.findById(id).orElseThrow(() -> new WeddingException("No Such Wedding"));
+        Wedding wedding = weddingRepository.findById(id).orElseThrow(() -> new WeddingException(WEDDING_NOT_FOUND));
         Long loggedInUser = getLoggedInUserId();
         if (wedding.getAuthorId() == null ? loggedInUser != null : !wedding.getAuthorId().equals(loggedInUser)) {
-            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
-//            } else if (wedding.isPublished()) {
-//                throw new WeddingException("This wedding has already been published!!!");
+            throw new WeddingException(AUTHORIZATION_ERROR);
+            } else if (wedding.getIsPublished()) {
+                throw new WeddingException("This wedding has already been published!!!");
         } else if (!(CoupleStatus.ACCEPTED.name().equalsIgnoreCase(wedding.getCoupleStatus().toString()))) {
             throw new WeddingException("Cannot publish wedding as spouse has not been added!!!");
         } else {
@@ -171,9 +168,9 @@ public class WeddingService {
     public WeddingDto updateWeddingInfo(WeddingDto weddingDto) {
         Long loggedInUser = getLoggedInUserId();
         if (loggedInUser == null || (!loggedInUser.equals(weddingDto.getAuthorId()) && !loggedInUser.equals(weddingDto.getSpouseId()))) {
-            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+            throw new WeddingException(AUTHORIZATION_ERROR);
         } else {
-            Wedding wedding = weddingRepository.findById(weddingDto.getId()).orElseThrow(() -> new WeddingException("No wedding associated to this id"));
+            Wedding wedding = weddingRepository.findById(weddingDto.getId()).orElseThrow(() -> new WeddingException(WEDDING_NOT_FOUND));
             wedding.setColourOfTheDay(weddingDto.getColourOfTheDay());
             wedding.setDateOfWedding(weddingDto.getDateOfWedding());
             wedding.setWeddingType(weddingDto.getWeddingType());
@@ -186,36 +183,32 @@ public class WeddingService {
     }
 
     public void deleteWedding(Long id) {
-        Wedding wedding = weddingRepository.findById(id).orElseThrow(() -> new WeddingException("No Such Wedding"));
+        Wedding wedding = weddingRepository.findById(id).orElseThrow(() -> new WeddingException(WEDDING_NOT_FOUND));
         Long loggedInUser = getLoggedInUserId();
         if (wedding.getAuthorId() == null ? loggedInUser != null : !wedding.getAuthorId().equals(loggedInUser)) {
-            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+            throw new WeddingException(AUTHORIZATION_ERROR);
         } else {
             List<Couple> coupleList = coupleRepository.findByWedding(wedding);
             if (!coupleList.isEmpty()) {
-                coupleList.forEach(couple -> {
-                    coupleRepository.delete(couple);
-                });
+                coupleList.forEach(couple -> coupleRepository.delete(couple));
             }
             Optional<List<CoupleRequest>> coupleRequestList = coupleRequestRepository.findByWedding(wedding);
             if (coupleRequestList.isPresent()) {
-                coupleRequestList.get().forEach(coupleRequest -> {
-                    coupleRequestRepository.delete(coupleRequest);
-                });
+                coupleRequestList.get().forEach(coupleRequest -> coupleRequestRepository.delete(coupleRequest));
             }
             weddingRepository.delete(wedding);
         }
     }
 
     public WeddingDto updateCoverFile(WeddingDto weddingDto, MultipartFile coverFile) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException(METHOD_NOT_SUPPORTED); //To change body of generated methods, choose Tools | Templates.
     }
 
     public void deleteCoverFile(WeddingDto weddingDto, MultipartFile coverFile) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException(METHOD_NOT_SUPPORTED); //To change body of generated methods, choose Tools | Templates.
     }
 
     public void removeGalleryImage(WeddingDto weddingDto, MultipartFile coverFile) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException(METHOD_NOT_SUPPORTED); //To change body of generated methods, choose Tools | Templates.
     }
 }

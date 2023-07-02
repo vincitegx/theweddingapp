@@ -19,11 +19,9 @@ import com.google.api.services.gmail.Gmail;
 import static com.google.api.services.gmail.GmailScopes.GMAIL_SEND;
 import com.google.api.services.gmail.model.Message;
 import org.apache.commons.codec.binary.Base64;
-//import javax.mail.Session;
-//import javax.mail.internet.InternetAddress;
-//import javax.mail.internet.MimeMessage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.Properties;
 import com.slinkdigital.mail.exception.MailServiceException;
 import static jakarta.mail.Message.RecipientType.TO;
@@ -37,9 +35,6 @@ import java.nio.file.Paths;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-//import static javax.mail.Message.RecipientType.TO;
-//import javax.mail.MessagingException;
-import lombok.Builder;
 import org.springframework.context.annotation.Profile;
 import org.springframework.messaging.MessagingException;
 
@@ -54,7 +49,7 @@ public class GMailService{
 
     private final Gmail service;
     
-    public GMailService() throws Exception {
+    public GMailService() throws GeneralSecurityException, IOException {
         NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
         GsonFactory jsonFactory = GsonFactory.getDefaultInstance();
         service = new Gmail.Builder(httpTransport, jsonFactory, getCredentials(httpTransport, jsonFactory))
@@ -78,28 +73,23 @@ public class GMailService{
             String encodedEmail = Base64.encodeBase64URLSafeString(rawMessageBytes);
             Message msg = new Message();
             msg.setRaw(encodedEmail);
-
-            try {
-                msg = service.users().messages().send("davidogbodu3056@gmail.com", msg).execute();
-                System.out.println("Message id: " + msg.getId());
-                System.out.println(msg.toPrettyString());
-            } catch (GoogleJsonResponseException e) {
-                GoogleJsonError error = e.getDetails();
-                if (error.getCode() == 403) {
-                    System.err.println("Unable to send message: " + e.getDetails());
-                } else {
-                    throw e;
-                }
-            }
+            sendMessages(msg);
         } catch (IOException | MessagingException ex) {
             throw new MailServiceException(ex.getMessage());
-        } catch (AddressException ex) {
-            Logger.getLogger(GMailService.class.getName()).log(Level.SEVERE, null, ex);
         } catch (jakarta.mail.MessagingException ex) {
             Logger.getLogger(GMailService.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
+    Message sendMessages(Message msg) {
+        try {
+            msg = service.users().messages().send("davidogbodu3056@gmail.com", msg).execute();
+            return msg;
+        } catch (IOException e) {
+            throw new MailServiceException(e.getMessage());
+        }
+    }
+
     private static Credential getCredentials(final NetHttpTransport httpTransport, GsonFactory jsonFactory)
             throws IOException {
         InputStream in = GMailService.class.getResourceAsStream("/client_secret_1042749728847-3crp3uuef1tn3cg2hjhf0g8b0qr4a54e.apps.googleusercontent.com.json");

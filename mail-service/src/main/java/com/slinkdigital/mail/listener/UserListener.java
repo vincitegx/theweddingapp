@@ -22,16 +22,16 @@ public class UserListener {
     private final MailService mailService;
 
     @KafkaListener(topicPattern = "user-registration", groupId = "user")
-    public void handleUserRegistration(ConsumerRecord<String, EventDto> record) {
-        EventDto eventDto = record.value();
+    public void handleUserRegistration(ConsumerRecord<String, EventDto> consumerRecord) {
+        EventDto eventDto = consumerRecord.value();
         Map<String, String> data = eventDto.getData();
         data.put("subject", "Verify Your Email");
         data.put("template", "userRegistrationTemplate");
         eventDto.setData(data);
 
-        log.info("Request send user registration recieved: " + record.toString());
+        log.info("Request send user registration recieved: " + consumerRecord.toString());
         if (eventDto.getFrom() == null) {
-            log.warn("Ignoring request to send an e-mail without e-mail address: " + record.toString());
+            log.warn("Ignoring request to send an e-mail without e-mail address: " + consumerRecord.toString());
             return;
         }
         try {
@@ -43,16 +43,16 @@ public class UserListener {
     }
 
     @KafkaListener(topicPattern = "user-password-reset", groupId = "user")
-    public void handleUserPasswordReset(ConsumerRecord<String, EventDto> record) {
-        EventDto eventDto = record.value();
+    public void handleUserPasswordReset(ConsumerRecord<String, EventDto> consumerRecord) {
+        EventDto eventDto = consumerRecord.value();
         Map<String, String> data = eventDto.getData();
         data.put("subject", "Reset Your Password");
         data.put("template", "pswResetTemplate");
         eventDto.setData(data);
 
-        log.info("Request send user registration recieved: " + record.toString());
+        log.info("Request send user registration recieved: " + consumerRecord.toString());
         if (eventDto.getFrom() == null) {
-            log.warn("Ignoring request to send an e-mail without e-mail address: " + record.toString());
+            log.warn("Ignoring request to send an e-mail without e-mail address: " + consumerRecord.toString());
             return;
         }
         try {

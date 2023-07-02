@@ -32,7 +32,7 @@ public class FileService {
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
             String fileExt = StringUtils.getFilenameExtension(file.getOriginalFilename());
             builder.part("file", new ByteArrayResource(file.getBytes())).filename(file.getName());
-            String coverImageUrl = webClientBuilder.build().post()
+            return webClientBuilder.build().post()
                     .uri("http://gateway-service/api/fs/v1/files",
                             uriBuilder -> uriBuilder
                                     .queryParam("file", file)
@@ -47,7 +47,6 @@ public class FileService {
                     .retrieve()
                     .bodyToMono(String.class)
                     .block();
-            return coverImageUrl;
     }
 
     public List<String> uploadFiles(List<MultipartFile> files) {

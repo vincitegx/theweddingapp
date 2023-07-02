@@ -27,8 +27,7 @@ public class TableOfContentService {
     public List<TableOfContentDto> getTableOfContentForWedding(Long id) {
         Wedding wedding = weddingRepository.findById(id).orElseThrow(() -> new WeddingException("No Such Wedding"));
         List<TableOfContent> tableOfContent = tableOfContentRepository.findByWeddingOrderByNumAsc(wedding);
-        List<TableOfContentDto> toc = tableOfContent.stream().map(t -> tocMapper.mapTableToDto(t)).collect(Collectors.toList());
-        return toc;
+        return tableOfContent.stream().map(t -> tocMapper.mapTableToDto(t)).collect(Collectors.toList());
     }
 
     public TableOfContentDto addTableOfContentElements(TableOfContentDto tableOfContentDto) {

@@ -28,12 +28,9 @@ public class VendorOwner implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
     private Long userId;
-    
     @Enumerated(EnumType.STRING)
     private VendorOwnerIdentity vendorOwnerIdentity;
-    
     private String identityUrl;
     
     @Enumerated(EnumType.STRING)
@@ -42,37 +39,7 @@ public class VendorOwner implements Serializable {
     @ManyToMany
     private List<VendorCategory> category;
     
-    private String companyName;
-    
-    private String companyImageUrl;
-    
-    private String companyEmail;
-    
-    private String companyAddress;
-    
-    private String companyPhoneNo;
-    
-    private String companyDescription;
-    
-    private String corporateAccountName;
-    
-    private String corporateAccountNo;
-   
-    private String corporateAccountBank;
-    
-    private String regNo;
-    
-    private String regCertificateUrl;
-    
-    private String nameOfAccountSignatory;
-    
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private VerificationStatus verificationStatus;
-    
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @Temporal(jakarta.persistence.TemporalType.DATE)
-    private Date dateOfCommencement;
+
     
     @Column(nullable = false, updatable = false)
     protected LocalDateTime createdAt;

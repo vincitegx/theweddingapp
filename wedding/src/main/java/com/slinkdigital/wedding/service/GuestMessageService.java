@@ -36,14 +36,18 @@ public class GuestMessageService {
     private final WeddingRepository weddingRepository;
     private final HttpServletRequest request;
     private final KafkaTemplate<String, EventDto> kakfaTemplate;
+    private static final String WEDDING_NOT_PUBLISHED = "You have to publish this wedding first";
+    private static final String AUTHORIZATION_ERROR = "Cannot Identify The User, Therefore operation cannot be performed";
+    private static final String WEDDING_NOT_FOUND = "No Such Wedding";
+    private static final String GUEST_MSG_NOT_FOUND = "No Such Wedding";
 
     public List<GuestMessageDto> getMessages(Long weddingId) {
-        Wedding wedding = weddingRepository.findById(weddingId).orElseThrow(() -> new WeddingException("No Such Wedding"));
+        Wedding wedding = weddingRepository.findById(weddingId).orElseThrow(() -> new WeddingException(WEDDING_NOT_FOUND));
         Long loggedInUser = getLoggedInUserId();
         if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
-            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+            throw new WeddingException(AUTHORIZATION_ERROR);
         } else if (!wedding.getIsPublished()) {
-            throw new WeddingException("You have to publish this wedding first");
+            throw new WeddingException(WEDDING_NOT_PUBLISHED);
         } else {
             List<GuestMessage> messageToGuests = messageToGuestRepository.findByWedding(wedding);
             List<GuestMessageDto> messageToGuestDtos = new ArrayList<>(messageToGuests.size());
@@ -55,25 +59,25 @@ public class GuestMessageService {
     }
 
     public GuestMessageDto getMessage(Long id) {
-        GuestMessage messageToGuest = messageToGuestRepository.findById(id).orElseThrow(() -> new WeddingException("No such message associated to this Id"));
+        GuestMessage messageToGuest = messageToGuestRepository.findById(id).orElseThrow(() -> new WeddingException(GUEST_MSG_NOT_FOUND));
         Wedding wedding = messageToGuest.getWedding();
         Long loggedInUser = getLoggedInUserId();
         if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
-            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+            throw new WeddingException(AUTHORIZATION_ERROR);
         } else if (!wedding.getIsPublished()) {
-            throw new WeddingException("You have to publish this wedding first");
+            throw new WeddingException(WEDDING_NOT_PUBLISHED);
         } else {
             return msgToGuestMapper.mapMessageToGuestToDto(messageToGuest);
         }
     }
 
     public GuestMessageDto addMessage(GuestMessageDto messageToGuestDto) {
-        Wedding wedding = weddingRepository.findById(messageToGuestDto.getWedding().getId()).orElseThrow(() -> new WeddingException("No such wedding associated to this Id"));
+        Wedding wedding = weddingRepository.findById(messageToGuestDto.getWedding().getId()).orElseThrow(() -> new WeddingException(WEDDING_NOT_FOUND));
         Long loggedInUser = getLoggedInUserId();
         if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
-            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+            throw new WeddingException(AUTHORIZATION_ERROR);
         } else if (!wedding.getIsPublished()) {
-            throw new WeddingException("You have to publish this wedding first");
+            throw new WeddingException(WEDDING_NOT_PUBLISHED);
         } else {
             messageToGuestDto.setCreatedAt(LocalDateTime.now());
             GuestMessage messageToGuest = msgToGuestMapper.mapDtoToMessageToGuest(messageToGuestDto);
@@ -83,13 +87,13 @@ public class GuestMessageService {
     }
 
     public GuestMessageDto putContent(GuestMessageDto messageToGuestDto) {
-        GuestMessage messageToGuest = messageToGuestRepository.findById(messageToGuestDto.getId()).orElseThrow(() -> new WeddingException("No such message associated to this Id"));
+        GuestMessage messageToGuest = messageToGuestRepository.findById(messageToGuestDto.getId()).orElseThrow(() -> new WeddingException(GUEST_MSG_NOT_FOUND));
         Wedding wedding = messageToGuest.getWedding();
         Long loggedInUser = getLoggedInUserId();
         if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
-            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+            throw new WeddingException(AUTHORIZATION_ERROR);
         } else if (!wedding.getIsPublished()) {
-            throw new WeddingException("You have to publish this wedding first");
+            throw new WeddingException(WEDDING_NOT_PUBLISHED);
         } else {
             messageToGuest.setContent(messageToGuestDto.getContent());
             messageToGuest.setTitle(messageToGuestDto.getTitle());
@@ -99,26 +103,26 @@ public class GuestMessageService {
     }
 
     public void deleteMessage(Long id) {
-        GuestMessage messageToGuest = messageToGuestRepository.findById(id).orElseThrow(() -> new WeddingException("No such message associated to this Id"));
+        GuestMessage messageToGuest = messageToGuestRepository.findById(id).orElseThrow(() -> new WeddingException(GUEST_MSG_NOT_FOUND));
         Wedding wedding = messageToGuest.getWedding();
         Long loggedInUser = getLoggedInUserId();
         if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
-            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+            throw new WeddingException(AUTHORIZATION_ERROR);
         } else if (!wedding.getIsPublished()) {
-            throw new WeddingException("You have to publish this wedding first");
+            throw new WeddingException(WEDDING_NOT_PUBLISHED);
         } else {
             messageToGuestRepository.delete(messageToGuest);
         }
     }
 
     public void sendMessageToGuests(MessageGuestDto messageGuestDto) {
-        GuestMessage messageToGuest = messageToGuestRepository.findById(messageGuestDto.getMessage().getId()).orElseThrow(() -> new WeddingException("No such message associated to this Id"));
+        GuestMessage messageToGuest = messageToGuestRepository.findById(messageGuestDto.getMessage().getId()).orElseThrow(() -> new WeddingException(GUEST_MSG_NOT_FOUND));
         Wedding wedding = messageToGuest.getWedding();
         Long loggedInUser = getLoggedInUserId();
         if (loggedInUser == null || (!loggedInUser.equals(wedding.getAuthorId()) && !loggedInUser.equals(wedding.getSpouseId()))) {
-            throw new WeddingException("Cannot Identify The User, Therefore operation cannot be performed");
+            throw new WeddingException(AUTHORIZATION_ERROR);
         } else if (!wedding.getIsPublished()) {
-            throw new WeddingException("You have to publish this wedding first");
+            throw new WeddingException(WEDDING_NOT_PUBLISHED);
         } else {
             String userEmail = getLoggedInUserEmail();
                 messageGuestDto.getGuests().forEach(g -> {

@@ -25,10 +25,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import com.slinkdigital.user.config.RequiresAuthorizationById;
+import com.slinkdigital.user.config.RequiresAuthorizationByRole;
 
 /**
  *
@@ -46,16 +49,18 @@ public class UserController1 {
     private final AdminService adminService;
     private final UserDtoMapper userDtoMapper;
 
+    @RequiresAuthorizationByRole //admin
     @Operation(security = {@SecurityRequirement(name = SwaggerConfig.BEARER_KEY_SECURITY_SCHEME)})
-    @GetMapping //admin
+    @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<UserDto> getAllUsers() {
+    public List<UserDto> getAllUsers(@RequestHeader("x-roles") String roles) {
         return userService.getAllUsers();
     }
 
+    @RequiresAuthorizationById
     @PutMapping("psw")
     @ResponseStatus(HttpStatus.OK)
-    public void updatePassword(@RequestBody UpdatePasswordRequest updatePasswordRequest) {
+    public void updatePassword(@RequestBody UpdatePasswordRequest updatePasswordRequest, @RequestHeader("x-id") String userId) {
         passwordService.updatePassword(updatePasswordRequest);
     }
 
@@ -77,16 +82,10 @@ public class UserController1 {
         authService.logout(refreshTokenRequest);
     }
     
-    @Operation(security = {@SecurityRequirement(name = BEARER_KEY_SECURITY_SCHEME)})
-    @GetMapping("/me")
-    public UserDto getCurrentUser(@AuthenticationPrincipal Users currentUser) {
-        Users user = authService.getCurrentUser();
-        return userDtoMapper.apply(user);
-    }
-    
+    @RequiresAuthorizationById
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteAccount(@RequestParam("id") Long id){
+    public void deleteAccount(@RequestParam("id") Long id, @RequestHeader("x-id") String userId){
         userService.deleteAccount(id);
     }
 }

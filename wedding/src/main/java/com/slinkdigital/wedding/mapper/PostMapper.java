@@ -60,8 +60,7 @@ public class PostMapper {
     public PostDto getJson(String postDto) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            PostDto postJson = objectMapper.readValue(postDto, PostDto.class);
-            return postJson;
+            return objectMapper.readValue(postDto, PostDto.class);
         } catch (IOException ex) {
             throw new WeddingException(ex.getMessage());
         }

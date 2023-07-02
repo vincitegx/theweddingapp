@@ -1,7 +1,8 @@
 package com.slinkdigital.wedding.util;
 
 import java.security.SecureRandom;
-import java.util.function.Function;
+import java.util.function.IntFunction;
+
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Component;
 
@@ -10,10 +11,10 @@ import org.springframework.stereotype.Component;
  * @author TEGA
  */
 @Component
-public class SecureRandomStringGenerator implements Function<Integer, String>{
+public class SecureRandomStringGenerator implements IntFunction<String> {
 
     @Override
-    public String apply(Integer t) {
-        return RandomStringUtils.random(t, 0, 0, true, true, null, new SecureRandom());
+    public String apply(int value) {
+        return RandomStringUtils.random(value, 0, 0, true, true, null, new SecureRandom());
     }
 }

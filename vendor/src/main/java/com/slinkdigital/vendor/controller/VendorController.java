@@ -1,9 +1,7 @@
 package com.slinkdigital.vendor.controller;
 
-import com.slinkdigital.vendor.dto.ApiResponse;
-import com.slinkdigital.vendor.dto.VendorCategoryDto;
-import com.slinkdigital.vendor.dto.VendorOwnerDto;
-import com.slinkdigital.vendor.dto.VendorDto;
+import com.slinkdigital.vendor.dto.*;
+import com.slinkdigital.vendor.mapper.VendorMapper;
 import com.slinkdigital.vendor.service.VendorService;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,9 +33,36 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("api/vs/v1/vendors")
 @RequiredArgsConstructor
 public class VendorController {
-    
     private final VendorService vendorService;
-    
+    private final VendorMapper vendorMapper;
+
+    @GetMapping("{id}")
+    public ResponseEntity<ApiResponse> getVendorById(@PathVariable Long id) {
+        VendorDto vendor = vendorService.getVendorById(id);
+        return ResponseEntity.ok(
+                ApiResponse.builder()
+                        .timeStamp(LocalDateTime.now())
+                        .data(Map.of("vendor", vendor))
+                        .message("Vendor Successful")
+                        .status(OK)
+                        .build()
+        );
+    }
+
+    @PostMapping(path = "personal",consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<ApiResponse> registerAsPersonalVendor(@RequestParam("request") String request,
+                                                                @RequestParam("file") MultipartFile identityImage){
+        PersonalVendorRegistrationRequest personalVendorRegistrationRequest = vendorMapper.getPersonalVendorRegistrationRequestJson(request);
+        Map<String, String> registrationStatus = vendorService.registerAsPersonalVendor(personalVendorRegistrationRequest, identityImage);
+        return ResponseEntity.ok(
+                ApiResponse.builder()
+                        .timeStamp(LocalDateTime.now())
+                        .data(Map.of("isRegistered", true))
+                        .message(registrationStatus.get("success"))
+                        .status(OK)
+                        .build()
+        );
+    }
     @GetMapping("users/{userId}")
     public ResponseEntity<ApiResponse> getVendorsForUser(@PathVariable Long userId,@RequestParam Optional<String> search,
             @RequestParam Optional<Integer> page,
@@ -98,19 +123,6 @@ public class VendorController {
                         .build()
         );
     }
-    
-//    @PutMapping("/updateVerificationStatusForUserAsVendor")
-//    public ResponseEntity<ApiResponse> updateVerificationStatusForUserAsVendor(@Valid @RequestBody VendorOwnerDto vendorDetailsDto){
-//       vendorDetailsDto = vendorService.updateVerificationStatusForUserAsVendor(vendorDetailsDto);
-//        return ResponseEntity.ok(
-//                ApiResponse.builder()
-//                        .timeStamp(LocalDateTime.now())
-//                        .data(Map.of("vendorDetailsDto", vendorDetailsDto))
-//                        .message("Update Successful")
-//                        .status(OK)
-//                        .build()
-//        );
-//    }
     
     @PutMapping("/updateVerificationStatusForVendor")
     public ResponseEntity<ApiResponse> updateVerificationStatusForVendor(@Valid @RequestBody VendorDto vendorDto){

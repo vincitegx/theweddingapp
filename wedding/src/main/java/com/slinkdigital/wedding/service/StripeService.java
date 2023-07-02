@@ -26,7 +26,7 @@ public class StripeService implements CardPaymentCharger {
 
     private final StripeApi stripeApi;
 
-    private final static RequestOptions requestOptions = RequestOptions.builder()
+    private static final RequestOptions requestOptions = RequestOptions.builder()
             .setApiKey("sk_test_4eC39HqLyjWDarjtT1zdp7dc")
             .build();
 

@@ -53,9 +53,7 @@ public class JwtProvider {
     private Collection<? extends GrantedAuthority> getAuthorities(Users user) {
         Set<Role> roles = user.getRoles();
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        roles.forEach((role) -> {
-            authorities.add(new SimpleGrantedAuthority(role.getName()));
-        });
+        roles.forEach(role -> authorities.add(new SimpleGrantedAuthority(role.getName())));
         return authorities;
     }
 
@@ -74,7 +72,7 @@ public class JwtProvider {
                 .withExpiresAt(Date.from(Instant.now().plusMillis(jwtExpirationInMillis)))
                 .withIssuer("WEDDING_APP")
                 .withIssuedAt(Date.from(Instant.now()))
-                .withClaim("roles", principal.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
+                .withClaim("roles", principal.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
                 .sign(HMAC256(secret.getBytes()));
     }
 
@@ -94,7 +92,7 @@ public class JwtProvider {
                     .withExpiresAt(Date.from(Instant.now().plusMillis(jwtExpirationInMillis)))
                     .withIssuer("WEDDING_APP")
                     .withIssuedAt(from(Instant.now()))
-                    .withClaim("roles", principal.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
+                    .withClaim("roles", principal.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
                     .sign(HMAC256(secret.getBytes()));
         } catch (JWTCreationException | IllegalArgumentException ex) {
             throw new UserException(ex.getMessage());
